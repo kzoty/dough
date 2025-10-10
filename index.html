@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dough — Welcome</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.png">
+  <meta name="theme-color" content="#3367D6">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <style>
+    body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#f6f7fb;color:#111}
+    main{max-width:36rem;padding:2rem;text-align:center}
+    button{margin-top:1rem;padding:.6rem 1rem;border-radius:6px;border:1px solid #ccc;background:white;cursor:pointer}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Welcome to Dough</h1>
+    <p>This is a very basic Progressive Web App ready site. Install it or open later — it will work offline.</p>
+    <button id="installBtn" hidden>Install</button>
+    <p id="status" aria-live="polite"></p>
+  </main>
+
+  <script>
+    // Register service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').then(reg => {
+        console.log('Service worker registered', reg);
+        document.getElementById('status').textContent = 'Service worker registered.';
+      }).catch(err => {
+        console.warn('SW registration failed', err);
+        document.getElementById('status').textContent = 'Service worker registration failed.';
+      });
+    } else {
+      document.getElementById('status').textContent = 'Service workers not supported in this browser.';
+    }
+
+    // Show install prompt when available
+    let deferredPrompt;
+    const installBtn = document.getElementById('installBtn');
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.hidden = false;
+    });
+    installBtn.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      document.getElementById('status').textContent = choice.outcome === 'accepted' ? 'App installed' : 'Installation dismissed';
+      deferredPrompt = null;
+      installBtn.hidden = true;
+    });
+  </script>
+</body>
+</html>
