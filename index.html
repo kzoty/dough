@@ -3,25 +3,66 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Dough — Welcome</title>
+  <title>Dough — Massas</title>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon-192.png">
   <meta name="theme-color" content="#3367D6">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="apple-touch-icon" href="icon-192.png">
   <style>
-    body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#f6f7fb;color:#111}
-    main{max-width:36rem;padding:2rem;text-align:center}
-    button{margin-top:1rem;padding:.6rem 1rem;border-radius:6px;border:1px solid #ccc;background:white;cursor:pointer}
+    :root{--card:#fff;--muted:#666}
+    html,body{height:100%;margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;background:#f6f7fb;color:#111}
+    .wrap{max-width:900px;margin:20px auto;padding:20px}
+    header{display:flex;align-items:center;justify-content:space-between}
+    h1{margin:0;font-size:1.25rem}
+    .card{background:var(--card);border-radius:8px;box-shadow:0 6px 18px rgba(20,20,50,0.06);padding:16px;margin-top:12px}
+    .products{width:100%;border-collapse:collapse}
+    .products td{padding:8px;vertical-align:middle}
+    .product-name{font-weight:600}
+    .qty-controls{display:flex;align-items:center;gap:8px}
+    button{padding:6px 10px;border-radius:6px;border:1px solid #ccc;background:white;cursor:pointer}
+    input[type=number]{width:64px;padding:6px;border:1px solid #ddd;border-radius:6px;text-align:center}
+    .summary{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:12px}
+    .muted{color:var(--muted)}
+    textarea{width:100%;min-height:120px;padding:8px;border-radius:6px;border:1px solid #ddd}
+    .actions{display:flex;gap:8px;align-items:center}
+    @media(max-width:640px){.qty-controls input{width:56px}}
   </style>
 </head>
 <body>
-  <main>
-    <h1>Welcome to Dough</h1>
-    <p>This is a very basic Progressive Web App ready site. Install it or open later — it will work offline.</p>
-    <button id="installBtn" hidden>Install</button>
-    <p id="status" aria-live="polite"></p>
-  </main>
+  <div class="wrap">
+    <header>
+      <h1>Calculadora de Massas</h1>
+      <div>
+        <button id="installBtn" hidden>Instalar</button>
+      </div>
+    </header>
+
+    <p class="muted">Carregue os produtos do arquivo JSON. Ajuste quantidades para ver subtotais e o total de massa.</p>
+
+    <section class="card" aria-labelledby="prodlist">
+      <h2 id="prodlist" style="font-size:1rem;margin:0 0 8px 0">Produtos</h2>
+      <table class="products" id="productsTable" role="list" aria-live="polite">
+        <!-- rows injected here -->
+      </table>
+
+      <div class="summary">
+        <div><strong>Total:</strong> <span id="totalWeight">0</span> g</div>
+        <div><strong>Nº massas:</strong> <span id="totalBatches">0</span> (350 g cada)</div>
+      </div>
+
+      <div style="margin-top:12px">
+        <label for="selectedList"><strong>Lista de produtos selecionados</strong></label>
+        <textarea id="selectedList" readonly></textarea>
+        <div class="actions" style="margin-top:8px">
+          <button id="copyBtn">Copiar lista</button>
+          <span id="copyStatus" class="muted" aria-live="polite"></span>
+        </div>
+      </div>
+    </section>
+
+    <p id="status" aria-live="polite" class="muted" style="margin-top:10px"></p>
+  </div>
 
   <script>
     // Register service worker
@@ -53,6 +94,136 @@
       deferredPrompt = null;
       installBtn.hidden = true;
     });
+
+    // --- Product list logic ---
+    const PRODUCTS_URL = 'products.json';
+    const productsTable = document.getElementById('productsTable');
+    const totalWeightEl = document.getElementById('totalWeight');
+    const totalBatchesEl = document.getElementById('totalBatches');
+    const selectedListEl = document.getElementById('selectedList');
+    const copyBtn = document.getElementById('copyBtn');
+    const copyStatus = document.getElementById('copyStatus');
+
+    let products = [];
+
+    function formatG(n){ return Math.round(n) + ' g'; }
+
+    async function loadProducts(){
+      try{
+        const res = await fetch(PRODUCTS_URL);
+        products = await res.json();
+        // initialize qty
+        products = products.map(p => ({...p, qty: 0}));
+        renderProducts();
+      }catch(err){
+        document.getElementById('status').textContent = 'Erro ao carregar products.json';
+        console.error(err);
+      }
+    }
+
+    function createRow(product, idx){
+      const tr = document.createElement('tr');
+
+      const nameTd = document.createElement('td');
+      nameTd.className = 'product-name';
+      nameTd.textContent = `${product.name} (${product.weight} g)`;
+
+      const controlsTd = document.createElement('td');
+      controlsTd.style.textAlign = 'right';
+
+      const controls = document.createElement('div');
+      controls.className = 'qty-controls';
+
+      const minus = document.createElement('button');
+      minus.type = 'button';
+      minus.textContent = '-';
+      minus.title = 'Diminuir';
+      minus.addEventListener('click', () => { updateQty(idx, products[idx].qty - 1); });
+
+      const qtyInput = document.createElement('input');
+      qtyInput.type = 'number';
+      qtyInput.min = '0';
+      qtyInput.value = product.qty;
+      qtyInput.addEventListener('change', () => {
+        let v = parseInt(qtyInput.value) || 0;
+        if (v < 0) v = 0;
+        updateQty(idx, v);
+      });
+
+      const plus = document.createElement('button');
+      plus.type = 'button';
+      plus.textContent = '+';
+      plus.title = 'Aumentar';
+      plus.addEventListener('click', () => { updateQty(idx, products[idx].qty + 1); });
+
+      const subtotal = document.createElement('div');
+      subtotal.style.minWidth = '90px';
+      subtotal.style.textAlign = 'right';
+      subtotal.className = 'muted';
+      subtotal.textContent = '0 g';
+
+      controls.appendChild(minus);
+      controls.appendChild(qtyInput);
+      controls.appendChild(plus);
+
+      controlsTd.appendChild(controls);
+      controlsTd.appendChild(subtotal);
+
+      tr.appendChild(nameTd);
+      tr.appendChild(controlsTd);
+
+      // store references
+      tr._qtyInput = qtyInput;
+      tr._subtotal = subtotal;
+      return tr;
+    }
+
+    function renderProducts(){
+      productsTable.innerHTML = '';
+      products.forEach((p, i) => productsTable.appendChild(createRow(p,i)));
+      refreshAll();
+    }
+
+    function updateQty(idx, newQty){
+      if (newQty < 0) newQty = 0;
+      products[idx].qty = newQty;
+      // update UI row
+      const row = productsTable.children[idx];
+      row._qtyInput.value = products[idx].qty;
+      row._subtotal.textContent = formatG(products[idx].qty * products[idx].weight);
+      refreshAll();
+    }
+
+    function refreshAll(){
+      const total = products.reduce((s,p) => s + (p.qty * p.weight), 0);
+      totalWeightEl.textContent = total;
+      const batches = Math.ceil(total / 350) || 0;
+      totalBatchesEl.textContent = batches;
+
+      // update subtotals for any that changed (in case of load)
+      products.forEach((p,i) => {
+        const row = productsTable.children[i];
+        if (row) row._subtotal.textContent = formatG(p.qty * p.weight);
+      });
+
+      // build selected list
+      const selected = products.filter(p => p.qty > 0).map(p => `${p.name} - ${p.qty}`);
+      selectedListEl.value = selected.join('\n');
+    }
+
+    copyBtn.addEventListener('click', async () => {
+      try{
+        await navigator.clipboard.writeText(selectedListEl.value);
+        copyStatus.textContent = 'Copiado!';
+        setTimeout(()=> copyStatus.textContent = '', 2000);
+      }catch(err){
+        copyStatus.textContent = 'Falha ao copiar';
+        console.error(err);
+      }
+    });
+
+    // load on start
+    loadProducts();
   </script>
 </body>
 </html>
