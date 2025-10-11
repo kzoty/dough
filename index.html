@@ -70,7 +70,8 @@
           <div class="subtitle">Ajuste quantidades e gere sua lista rapidamente</div>
         </div>
       </div>
-      <div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button id="addBtn" title="Adicionar produto">＋</button>
         <button id="installBtn" hidden>Instalar</button>
       </div>
     </header>
@@ -79,6 +80,11 @@
 
     <section class="card" aria-labelledby="prodlist">
       <h2 id="prodlist" style="font-size:1rem;margin:0 0 8px 0">Produtos</h2>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px;gap:8px">
+        <button id="exportBtn" class="muted">Exportar JSON</button>
+        <button id="importBtn" class="muted">Importar JSON</button>
+        <input id="importFile" type="file" accept="application/json" style="display:none">
+      </div>
       <table class="products" id="productsTable" role="list" aria-live="polite">
         <!-- rows injected here -->
       </table>
@@ -142,15 +148,22 @@
     const copyStatus = document.getElementById('copyStatus');
 
     let products = [];
+  const STORAGE_KEY = 'dough_products_v1';
 
     function formatG(n){ return Math.round(n) + ' g'; }
 
     async function loadProducts(){
       try{
-        const res = await fetch(PRODUCTS_URL);
-        products = await res.json();
-        // initialize qty
-        products = products.map(p => ({...p, qty: 0}));
+        // try load from localStorage first
+        const local = localStorage.getItem(STORAGE_KEY);
+        if(local){
+          products = JSON.parse(local);
+        } else {
+          const res = await fetch(PRODUCTS_URL);
+          products = await res.json();
+        }
+        // ensure qty defaults
+        products = products.map(p => ({...p, qty: p.qty || 0}));
         renderProducts();
       }catch(err){
         document.getElementById('status').textContent = 'Erro ao carregar products.json';
@@ -210,9 +223,76 @@
       tr.appendChild(controlsTd);
 
       // store references
+      // attach edit/delete on double click
+      tr.addEventListener('dblclick', (e) => {
+        e.stopPropagation();
+        showEditControls(tr, idx);
+      });
+
       tr._qtyInput = qtyInput;
       tr._subtotal = subtotal;
       return tr;
+    }
+
+    function showEditControls(row, idx){
+      // if controls already present, ignore
+      if(row._editShown) return;
+      row._editShown = true;
+      const editWrap = document.createElement('div');
+      editWrap.style.display = 'flex';
+      editWrap.style.gap = '8px';
+      editWrap.style.marginTop = '8px';
+
+      const nameInput = document.createElement('input');
+      nameInput.type = 'text';
+      nameInput.value = products[idx].name;
+      nameInput.style.flex = '1';
+      const weightInput = document.createElement('input');
+      weightInput.type = 'number';
+      weightInput.value = products[idx].weight;
+      weightInput.style.width = '96px';
+
+      const saveBtn = document.createElement('button');
+      saveBtn.textContent = 'Salvar';
+      saveBtn.addEventListener('click', () => {
+        const newName = nameInput.value.trim() || products[idx].name;
+        const newWeight = Math.max(0, parseInt(weightInput.value) || products[idx].weight);
+        products[idx].name = newName;
+        products[idx].weight = newWeight;
+        persistProducts();
+        renderProducts();
+      });
+
+      const delBtn = document.createElement('button');
+      delBtn.textContent = 'Excluir';
+      delBtn.style.background = 'var(--danger)';
+      delBtn.style.color = 'white';
+      delBtn.addEventListener('click', () => {
+        if(!confirm('Excluir este produto?')) return;
+        products.splice(idx,1);
+        persistProducts();
+        renderProducts();
+      });
+
+      editWrap.appendChild(nameInput);
+      editWrap.appendChild(weightInput);
+      editWrap.appendChild(saveBtn);
+      editWrap.appendChild(delBtn);
+
+      // append below the row
+      const container = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 2;
+      td.appendChild(editWrap);
+      container.appendChild(td);
+      row.parentNode.insertBefore(container, row.nextSibling);
+      row._editRow = container;
+    }
+
+    function persistProducts(){
+      // save base fields only
+      const toSave = products.map(p => ({name:p.name, weight:p.weight, qty:p.qty || 0}));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
     }
 
     function renderProducts(){
@@ -229,6 +309,7 @@
       row._qtyInput.value = products[idx].qty;
       row._subtotal.textContent = formatG(products[idx].qty * products[idx].weight);
       refreshAll();
+      persistProducts();
     }
 
     function refreshAll(){
@@ -257,6 +338,77 @@
         copyStatus.textContent = 'Falha ao copiar';
         console.error(err);
       }
+    });
+
+    // --- Add / Import / Export ---
+    const addBtn = document.getElementById('addBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const importBtn = document.getElementById('importBtn');
+    const importFile = document.getElementById('importFile');
+
+    addBtn.addEventListener('click', () => {
+      // show quick add inputs at top
+      if(document.getElementById('quickAdd')) return;
+      const tr = document.createElement('tr');
+      tr.id = 'quickAdd';
+      const tdName = document.createElement('td');
+      const nameInput = document.createElement('input');
+      nameInput.placeholder = 'Nome do produto';
+      nameInput.style.width = '100%';
+      tdName.appendChild(nameInput);
+
+      const tdRight = document.createElement('td');
+      tdRight.style.textAlign = 'right';
+      const weightInput = document.createElement('input');
+      weightInput.type = 'number';
+      weightInput.placeholder = 'peso (g)';
+      weightInput.style.width = '90px';
+      const save = document.createElement('button');
+      save.textContent = 'Salvar';
+      save.style.marginLeft = '8px';
+      save.addEventListener('click', () => {
+        const name = (nameInput.value || '').trim();
+        const weight = Math.max(0, parseInt(weightInput.value) || 0);
+        if(!name || weight <= 0){ alert('Informe nome e peso válidos'); return; }
+        products.push({name, weight, qty:0});
+        persistProducts();
+        renderProducts();
+      });
+      tdRight.appendChild(weightInput);
+      tdRight.appendChild(save);
+
+      tr.appendChild(tdName);
+      tr.appendChild(tdRight);
+      productsTable.insertBefore(tr, productsTable.firstChild);
+      nameInput.focus();
+    });
+
+    exportBtn.addEventListener('click', () => {
+      const data = JSON.stringify(products.map(p=>({name:p.name,weight:p.weight})), null, 2);
+      const blob = new Blob([data], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'products-export.json'; document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    importBtn.addEventListener('click', () => importFile.click());
+    importFile.addEventListener('change', (e) => {
+      const f = e.target.files && e.target.files[0];
+      if(!f) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try{
+          const data = JSON.parse(reader.result);
+          if(!Array.isArray(data)) throw new Error('Formato inválido');
+          // normalize and replace
+          products = data.map(d => ({name: d.name || 'Produto', weight: parseInt(d.weight) || 0, qty: 0}));
+          persistProducts();
+          renderProducts();
+        }catch(err){ alert('Arquivo inválido: ' + err.message); }
+      };
+      reader.readAsText(f);
+      importFile.value = '';
     });
 
     // load on start
