@@ -235,8 +235,8 @@
       tr.appendChild(controlsTd);
 
       // store references
-      // attach edit/delete on double click
-      tr.addEventListener('dblclick', (e) => {
+      // attach edit/delete on double click only on the product name (avoid triggering when clicking +/-)
+      nameTd.addEventListener('dblclick', (e) => {
         e.stopPropagation();
         showEditControls(tr, idx);
       });
