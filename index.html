@@ -114,6 +114,80 @@
         <br /> 
         <div><a href="https://claude.ai/public/artifacts/adf1a4c9-b720-4df0-8317-177695fd735e" target="_blank">MASSAS</a></div>
       </div>
+
+      <!-- Calculadora de massas (longa fermentação) -->
+      <hr style="margin:16px 0;border:none;border-top:1px solid #eef2f7" />
+      <section class="card" aria-labelledby="calc-long-ferment">
+        <h2 id="calc-long-ferment" style="font-size:1rem;margin:0 0 8px 0">Calculadora de massas (longa fermentação)</h2>
+        <div class="card" style="background:#fff7ed;border:1px solid #ffe4cc">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px">
+            <label style="display:flex;flex-direction:column;gap:6px">
+              <span><strong>Nº de massas</strong> <span class="muted">(350 g cada)</span></span>
+              <input id="c-nMassas" type="number" min="1" value="5" style="padding:10px;border:1px solid #f2c791;background:#fff;border-radius:10px;font-weight:700" />
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px">
+              <span><strong>Poolish</strong> <span class="muted">(% da farinha total)</span></span>
+              <input id="c-poolishPct" type="number" min="10" max="80" step="1" value="30" style="padding:10px;border:1px solid #f2c791;background:#fff;border-radius:10px;font-weight:700" />
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px">
+              <span><strong>Hidratação</strong> <span class="muted">(% água / farinha)</span></span>
+              <input id="c-aguaPct" type="number" min="40" max="90" step="0.5" value="62" style="padding:10px;border:1px solid #f2c791;background:#fff;border-radius:10px;font-weight:700" />
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px">
+              <span><strong>Sal</strong> <span class="muted">(% / farinha)</span></span>
+              <input id="c-salPct" type="number" min="0.5" max="3" step="0.1" value="1.5" style="padding:10px;border:1px solid #f2c791;background:#fff;border-radius:10px;font-weight:700" />
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px">
+              <span><strong>Fermento</strong> <span class="muted">(% / farinha)</span></span>
+              <input id="c-fermentoPct" type="number" min="0" max="2" step="0.05" value="0.3" style="padding:10px;border:1px solid #f2c791;background:#fff;border-radius:10px;font-weight:700" />
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px">
+              <span><strong>Temperatura</strong> <span class="muted">(°C, ajusta fermento no poolish)</span></span>
+              <input id="c-tempC" type="number" min="0" max="40" step="0.5" value="26" style="padding:10px;border:1px solid #f2c791;background:#fff;border-radius:10px;font-weight:700" />
+            </label>
+          </div>
+        </div>
+
+        <div class="summary" style="margin-top:12px">
+          <div class="row"><strong>Massa total</strong><span id="c-massaTotal">0 g</span></div>
+          <div class="row"><strong>Farinha total</strong><span id="c-farinhaTotal">0 g</span></div>
+          <div class="row"><strong>Água total</strong><span id="c-aguaTotal">0 g</span></div>
+          <div class="row"><strong>Sal total</strong><span id="c-salTotal">0 g</span></div>
+          <div class="row"><strong>Fermento total</strong><span id="c-fermentoTotal">0 g</span></div>
+        </div>
+
+        <div class="card" style="margin-top:12px;background:#ecfeff;border:1px solid #bae6fd">
+          <h3 style="margin:0 0 8px 0;font-size:0.95rem">Poolish (noite anterior)</h3>
+          <div class="summary">
+            <div class="row"><span>Farinha no poolish</span><span id="c-poolishFarinha">0 g</span></div>
+            <div class="row"><span>Água no poolish</span><span id="c-poolishAgua">0 g</span></div>
+            <div class="row"><span>Fermento no poolish</span><span id="c-poolishFermento">0 g</span></div>
+            <div class="row"><span>Peso do poolish</span><span id="c-poolishPeso">0 g</span></div>
+          </div>
+          <p class="muted" id="c-poolishInstr" style="margin-top:8px"></p>
+        </div>
+
+        <div class="card" style="margin-top:12px;background:#ecfdf5;border:1px solid #bbf7d0">
+          <h3 style="margin:0 0 8px 0;font-size:0.95rem">Finalização (manhã)</h3>
+          <div class="summary">
+            <div class="row"><span>Farinha restante</span><span id="c-finFarinha">0 g</span></div>
+            <div class="row"><span>Água restante</span><span id="c-finAgua">0 g</span></div>
+            <div class="row"><span>Sal</span><span id="c-finSal">0 g</span></div>
+            <div class="row"><span>Fermento restante</span><span id="c-finFermento">0 g</span></div>
+          </div>
+          <p class="muted" id="c-finInstr" style="margin-top:8px"></p>
+        </div>
+
+        <!-- Resumo copiável -->
+        <div class="card" style="margin-top:12px;background:#0b0f19;border:1px solid #111827;color:#fff">
+          <h3 style="margin:0 0 8px 0;font-size:0.95rem;color:#fff">Resumo</h3>
+          <textarea id="c-resumo" readonly style="width:100%;min-height:180px;background:#000;color:#fff;border:1px solid #222;border-radius:10px;padding:12px;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace"></textarea>
+          <div class="actions" style="margin-top:8px">
+            <button id="c-copyResumo" style="background:#10b981;color:#fff;border:0;padding:10px 12px;border-radius:10px">Copiar resumo</button>
+            <span id="c-copyResumoStatus" class="muted" aria-live="polite" style="color:#cbd5e1"></span>
+          </div>
+        </div>
+      </section>
     </section>
 
     <p id="status" aria-live="polite" class="muted" style="margin-top:10px"></p>
@@ -427,6 +501,141 @@
 
     // load on start
     loadProducts();
+
+    // --- Calculadora de massas (longa fermentação) ---
+    const elNM = document.getElementById('c-nMassas');
+    if (elNM) {
+      const elPoolishPct = document.getElementById('c-poolishPct');
+      const elAguaPct = document.getElementById('c-aguaPct');
+      const elSalPct = document.getElementById('c-salPct');
+      const elFerPct = document.getElementById('c-fermentoPct');
+      const elTempC = document.getElementById('c-tempC');
+
+      const elMassaTotal = document.getElementById('c-massaTotal');
+      const elFarinhaTotal = document.getElementById('c-farinhaTotal');
+      const elAguaTotal = document.getElementById('c-aguaTotal');
+      const elSalTotal = document.getElementById('c-salTotal');
+      const elFerTotal = document.getElementById('c-fermentoTotal');
+
+      const elPoolishPeso = document.getElementById('c-poolishPeso');
+      const elPoolishFar = document.getElementById('c-poolishFarinha');
+      const elPoolishAgua = document.getElementById('c-poolishAgua');
+      const elPoolishFer = document.getElementById('c-poolishFermento');
+      const elPoolishInstr = document.getElementById('c-poolishInstr');
+
+      const elFinFar = document.getElementById('c-finFarinha');
+      const elFinAgua = document.getElementById('c-finAgua');
+      const elFinSal = document.getElementById('c-finSal');
+      const elFinFer = document.getElementById('c-finFermento');
+      const elFinInstr = document.getElementById('c-finInstr');
+
+      const elResumo = document.getElementById('c-resumo');
+      const elCopyResumo = document.getElementById('c-copyResumo');
+      const elCopyResumoStatus = document.getElementById('c-copyResumoStatus');
+
+      function recalc() {
+        const n = Math.max(1, parseInt(elNM.value || '0'));
+        const massaTotal = n * 350;
+
+        const h = Math.max(0, parseFloat(elAguaPct.value || '62'))/100;
+        const s = Math.max(0, parseFloat(elSalPct.value || '1.5'))/100;
+        const y = Math.max(0, parseFloat(elFerPct.value || '0.3'))/100;
+        const pPct = Math.max(0, Math.min(0.8, parseFloat(elPoolishPct.value || '30')/100));
+        const temp = parseFloat(elTempC.value || '25');
+
+        const farinhaTotal = massaTotal / (1 + h + s + y);
+        const aguaTotal = farinhaTotal * h;
+        const salTotal = farinhaTotal * s;
+        const fermentoTotal = farinhaTotal * y;
+
+        // Poolish: baseado na farinha total, 100% hidratação; fermento proporcional à farinha do poolish
+        const poolishFarinha = farinhaTotal * pPct;
+        const poolishAgua = poolishFarinha; // 100% hidratação no poolish
+        // Fermento do poolish ajustado pela temperatura informada
+        // 18–20°C => 0,13% | 20–24°C => 0,10% | 25–28°C => 0,06%
+        let yPoolishPct = 0.001; // fallback
+        if (temp >= 18 && temp <= 20) yPoolishPct = 0.0013;
+        else if (temp > 20 && temp <= 24) yPoolishPct = 0.0010;
+        else if (temp > 24 && temp <= 28) yPoolishPct = 0.0006;
+        const poolishFermento = poolishFarinha * yPoolishPct;
+
+        // Correções para não exceder totais
+        const pf = Math.min(poolishFarinha, farinhaTotal);
+        const pa = Math.min(poolishAgua, aguaTotal);
+        const py = Math.min(poolishFermento, fermentoTotal);
+
+        const finFarinha = Math.max(0, farinhaTotal - pf);
+        const finAgua = Math.max(0, aguaTotal - pa);
+        const finSal = salTotal; // sal apenas na finalização
+        const finFermento = Math.max(0, fermentoTotal - py);
+
+        // Totais
+        elMassaTotal.textContent = formatG(massaTotal);
+        elFarinhaTotal.textContent = formatG(farinhaTotal);
+        elAguaTotal.textContent = formatG(aguaTotal);
+        elSalTotal.textContent = formatG(salTotal);
+        elFerTotal.textContent = formatG(fermentoTotal);
+
+        // Poolish
+        elPoolishPeso.textContent = formatG(pf + pa + py);
+        elPoolishFar.textContent = formatG(pf);
+        elPoolishAgua.textContent = formatG(pa);
+        elPoolishFer.textContent = formatG(py);
+
+        // Instruções
+        elPoolishInstr.textContent = `Na noite anterior: misture ${formatG(pf)} de farinha, ${formatG(pa)} de água (temperatura ambiente) e ${formatG(py)} de fermento. Cubra e deixe fermentar até borbulhar (8–12h, conforme temperatura).`;
+        elFinInstr.textContent = `De manhã (5–6h): adicione ao poolish ${formatG(finFarinha)} de farinha, ${formatG(finAgua)} de água, ${formatG(finSal)} de sal e ${formatG(finFermento)} de fermento. Misture, sove ou faça dobras, e siga o processo de longa fermentação habitual.`;
+
+        // Finalização
+        elFinFar.textContent = formatG(finFarinha);
+        elFinAgua.textContent = formatG(finAgua);
+        elFinSal.textContent = formatG(finSal);
+        elFinFer.textContent = formatG(finFermento);
+
+        // Resumo
+        const nStr = `${n} MASSAS`;
+        const hid = Math.round(h*1000)/10; // 62.0
+        const salp = Math.round(s*1000)/10; // 1.5
+        const poolp = Math.round(pPct*1000)/10; // 40.0
+        const tempStr = isNaN(temp) ? '-' : Math.round(temp);
+
+        const lines = [];
+        lines.push(`--- ${nStr} ---`);
+        lines.push(`hidratação ${hid} | poolish ${poolp} | sal ${salp} | temp ${tempStr}`);
+        lines.push('');
+        lines.push('Poolish');
+        lines.push(`* FAR: ${Math.round(pf*10)/10}g`);
+        lines.push(`* H2O: ${Math.round(pa*10)/10}g`);
+        lines.push(`* FER: ${Math.round(py*10)/10}g`);
+        lines.push('');
+        lines.push('FINALIZAÇÃO');
+        lines.push(`* FAR: ${Math.round(finFarinha*10)/10}g`);
+        lines.push(`* H2O: ${Math.round(finAgua*10)/10}g`);
+        lines.push(`* SAL: ${Math.round(finSal*10)/10}g`);
+        lines.push(`* FER: ${Math.round(finFermento*10)/10}g`);
+        elResumo.value = lines.join('\n');
+      }
+
+      [elNM, elPoolishPct, elAguaPct, elSalPct, elFerPct, elTempC].forEach(el => {
+        el.addEventListener('input', recalc);
+        el.addEventListener('change', recalc);
+      });
+
+      if (elCopyResumo) {
+        elCopyResumo.addEventListener('click', async () => {
+          try{
+            await navigator.clipboard.writeText(elResumo.value);
+            elCopyResumoStatus.textContent = 'Copiado!';
+            setTimeout(()=> elCopyResumoStatus.textContent = '', 2000);
+          }catch(err){
+            elCopyResumoStatus.textContent = 'Falha ao copiar';
+            console.error(err);
+          }
+        });
+      }
+
+      recalc();
+    }
   </script>
   <br />
   </body>
