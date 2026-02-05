@@ -537,10 +537,10 @@
         const n = Math.max(1, parseInt(elNM.value || '0'));
         const massaTotal = n * 350;
 
-        const h = Math.max(0, parseFloat(elAguaPct.value || '62'))/100;
+        const h = Math.max(0, parseFloat(elAguaPct.value || '60'))/100;
         const s = Math.max(0, parseFloat(elSalPct.value || '1.5'))/100;
         const y = Math.max(0, parseFloat(elFerPct.value || '0.3'))/100;
-        const pPct = Math.max(0, Math.min(0.8, parseFloat(elPoolishPct.value || '30')/100));
+        const pPct = Math.max(0, Math.min(0.8, parseFloat(elPoolishPct.value || '40')/100));
         const temp = parseFloat(elTempC.value || '25');
 
         const farinhaTotal = massaTotal / (1 + h + s + y);
