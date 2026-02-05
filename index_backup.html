@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dough — Massas</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.png">
+  <meta name="theme-color" content="#3367D6">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <style>
+    :root{
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --muted:#6b7280;
+      --accent:#2b6ef6;
+      --danger:#e53e3e;
+      --radius:12px;
+    }
+
+    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;background:var(--bg);color:#0f172a;-webkit-font-smoothing:antialiased}
+    .wrap{max-width:540px;margin:12px auto;padding:14px}
+
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .brand{display:flex;align-items:center;gap:10px}
+    .brand img{width:44px;height:44px;border-radius:8px}
+    h1{margin:0;font-size:1.05rem;font-weight:700}
+    .subtitle{font-size:0.85rem;color:var(--muted);margin-top:4px}
+
+    .card{background:var(--card);border-radius:var(--radius);box-shadow:0 8px 24px rgba(12,18,30,0.06);padding:14px;margin-top:12px}
+
+    /* products as responsive rows */
+    .products{width:100%;border-collapse:collapse}
+    .products tr{display:flex;flex-direction:row;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid #f0f3f7}
+    .products tr:last-child{border-bottom:0}
+    .products td{vertical-align:middle}
+    .product-name{font-weight:600;font-size:0.98rem}
+    .product-weight{display:block;font-size:0.78rem;color:var(--muted);margin-top:4px}
+
+    .qty-controls{display:flex;align-items:center;gap:8px}
+  .qty-controls button{width:44px;height:44px;border-radius:10px;border:1px solid rgba(15,23,42,0.08);background:#fff;font-size:20px;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(12,18,30,0.04)}
+  .qty-controls .btn-plus{background:var(--accent);color:white;border:0;box-shadow:0 6px 18px rgba(43,110,246,0.18)}
+  .qty-controls .btn-plus:active{transform:translateY(1px) scale(.995)}
+  .qty-controls .btn-minus{background:#ff6b6b;color:white;border:0;box-shadow:0 6px 18px rgba(255,107,107,0.12)}
+  .qty-controls .btn-minus:active{transform:translateY(1px) scale(.995)}
+    .qty-controls button:active{transform:translateY(1px)}
+    input[type=number]{width:74px;padding:8px;border:1px solid #e6edf7;border-radius:10px;text-align:center;font-weight:600}
+
+    .subtotal{min-width:92px;text-align:right;font-weight:700;color:#0f172a}
+
+  .summary{display:flex;flex-direction:column;gap:8px;align-items:stretch;margin-top:12px}
+  .summary .row{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;background:#f8fafc}
+  /* highlighted batches pill */
+  .batches-pill{display:inline-block;background:var(--accent);color:white;padding:6px 10px;border-radius:999px;font-weight:800;margin-left:8px}
+  .batches-note{color:var(--muted);font-size:0.9rem;margin-left:8px}
+    .muted{color:var(--muted)}
+
+    textarea{width:100%;min-height:140px;padding:10px;border-radius:8px;border:1px solid #eef3fb;font-family:inherit}
+    .actions{display:flex;gap:8px;align-items:center}
+    #copyBtn{background:var(--accent);color:white;border:0;padding:10px 12px;border-radius:10px}
+
+    #installBtn{background:transparent;border:1px solid rgba(15,23,42,0.06);padding:8px 10px;border-radius:10px}
+
+    @media(min-width:560px){
+      .wrap{padding:20px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <img src="icon-192.png" alt="Dough">
+        <div>
+          <h1>Calculadora de Massas</h1>
+          <div class="subtitle">Ajuste quantidades e gere sua lista rapidamente</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button id="addBtn" title="Adicionar produto">＋</button>
+        <button id="installBtn" hidden>Instalar</button>
+      </div>
+    </header>
+
+    <p class="muted">Carregue os produtos do arquivo JSON. Ajuste quantidades para ver subtotais e o total de massa.</p>
+
+    <section class="card" aria-labelledby="prodlist">
+      <h2 id="prodlist" style="font-size:1rem;margin:0 0 8px 0">Produtos</h2>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px;gap:8px">
+        <button id="exportBtn" class="muted">Exportar JSON</button>
+        <button id="importBtn" class="muted">Importar JSON</button>
+        <input id="importFile" type="file" accept="application/json" style="display:none">
+      </div>
+      <table class="products" id="productsTable" role="list" aria-live="polite">
+        <!-- rows injected here -->
+      </table>
+
+      <div class="summary">
+        <div><strong>Total:</strong> <span id="totalWeight">0</span> g</div>
+        <div style="display:flex;align-items:center"><strong>Nº massas:</strong>
+          <span id="totalBatches" class="batches-pill">0</span>
+          <span class="batches-note">(350 g cada)</span>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <label for="selectedList"><strong>Lista de produtos selecionados</strong></label>
+        <textarea id="selectedList" readonly></textarea>
+        <div class="actions" style="margin-top:8px">
+          <button id="copyBtn">Copiar lista</button>
+          <span id="copyStatus" class="muted" aria-live="polite"></span>
+        </div>
+        <br /> 
+        <div><a href="https://claude.ai/public/artifacts/adf1a4c9-b720-4df0-8317-177695fd735e" target="_blank">MASSAS</a></div>
+      </div>
+
+      <!-- Calculadora de massas (longa fermentação) -->
+      <hr style="margin:16px 0;border:none;border-top:1px solid #eef2f7" />
+      <section class="card" aria-labelledby="calc-long-ferment">
+        <h2 id="calc-long-ferment" style="font-size:1rem;margin:0 0 8px 0">Calculadora de massas (longa fermentação)</h2>
+        <div class="card" style="background:#fff7ed;border:1px solid #ffe4cc">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px">
+            <label style="display:flex;flex-direction:column;gap:6px">
+              <span><strong>Nº de massas</strong> <span class="muted">(350 g cada)</span></span>
+              <input id="c-nMassas" type="number" min="1" value="5" style="padding:10px;border:1px solid #f2c791;background:#fff;border-radius:10px;font-weight:700" />
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px">
+              <span><strong>Poolish</strong> <span class="muted">(% da farinha total)</span></span>
+              <input id="c-poolishPct" type="number" min="10" max="80" step="1" value="30" style="padding:10px;border:1px solid #f2c791;background:#fff;border-radius:10px;font-weight:700" />
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px">
+              <span><strong>Hidratação</strong> <span class="muted">(% água / farinha)</span></span>
+              <input id="c-aguaPct" type="number" min="40" max="90" step="0.5" value="62" style="padding:10px;border:1px solid #f2c791;background:#fff;border-radius:10px;font-weight:700" />
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px">
+              <span><strong>Sal</strong> <span class="muted">(% / farinha)</span></span>
+              <input id="c-salPct" type="number" min="0.5" max="3" step="0.1" value="1.5" style="padding:10px;border:1px solid #f2c791;background:#fff;border-radius:10px;font-weight:700" />
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px">
+              <span><strong>Fermento</strong> <span class="muted">(% / farinha)</span></span>
+              <input id="c-fermentoPct" type="number" min="0" max="2" step="0.05" value="0.3" style="padding:10px;border:1px solid #f2c791;background:#fff;border-radius:10px;font-weight:700" />
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px">
+              <span><strong>Temperatura</strong> <span class="muted">(°C, ajusta fermento no poolish)</span></span>
+              <input id="c-tempC" type="number" min="0" max="40" step="0.5" value="26" style="padding:10px;border:1px solid #f2c791;background:#fff;border-radius:10px;font-weight:700" />
+            </label>
+          </div>
+        </div>
+
+        <div class="summary" style="margin-top:12px">
+          <div class="row"><strong>Massa total</strong><span id="c-massaTotal">0 g</span></div>
+          <div class="row"><strong>Farinha total</strong><span id="c-farinhaTotal">0 g</span></div>
+          <div class="row"><strong>Água total</strong><span id="c-aguaTotal">0 g</span></div>
+          <div class="row"><strong>Sal total</strong><span id="c-salTotal">0 g</span></div>
+          <div class="row"><strong>Fermento total</strong><span id="c-fermentoTotal">0 g</span></div>
+        </div>
+
+        <div class="card" style="margin-top:12px;background:#ecfeff;border:1px solid #bae6fd">
+          <h3 style="margin:0 0 8px 0;font-size:0.95rem">Poolish (noite anterior)</h3>
+          <div class="summary">
+            <div class="row"><span>Farinha no poolish</span><span id="c-poolishFarinha">0 g</span></div>
+            <div class="row"><span>Água no poolish</span><span id="c-poolishAgua">0 g</span></div>
+            <div class="row"><span>Fermento no poolish</span><span id="c-poolishFermento">0 g</span></div>
+            <div class="row"><span>Peso do poolish</span><span id="c-poolishPeso">0 г</span></div>
+          </div>
+          <p class="muted" id="c-poolishInstr" style="margin-top:8px"></p>
+        </div>
+
+        <div class="card" style="margin-top:12px;background:#ecfdf5;border:1px solid #bbf7d0">
+          <h3 style="margin:0 0 8px 0;font-size:0.95rem">Finalização (manhã)</h3>
+          <div class="summary">
+            <div class="row"><span>Farinha restante</span><span id="c-finFarinha">0 g</span></div>
+            <div class="row"><span>Água restante</span><span id="c-finAgua">0 g</span></div>
+            <div class="row"><span>Sal</span><span id="c-finSal">0 g</span></div>
+            <div class="row"><span>Fermento restante</span><span id="c-finFermento">0 g</span></div>
+          </div>
+          <p class="muted" id="c-finInstr" style="margin-top:8px"></p>
+        </div>
+
+        <!-- Resumo copiável -->
+        <div class="card" style="margin-top:12px;background:#0b0f19;border:1px solid #111827;color:#fff">
+          <h3 style="margin:0 0 8px 0;font-size:0.95rem;color:#fff">Resumo</h3>
+          <textarea id="c-resumo" readonly style="width:100%;min-height:180px;background:#000;color:#fff;border:1px solid #222;border-radius:10px;padding:12px;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace"></textarea>
+          <div class="actions" style="margin-top:8px">
+            <button id="c-copyResumo" style="background:#10b981;color:#fff;border:0;padding:10px 12px;border-radius:10px">Copiar resumo</button>
+            <span id="c-copyResumoStatus" class="muted" aria-live="polite" style="color:#cbd5e1"></span>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <p id="status" aria-live="polite" class="muted" style="margin-top:10px"></p>
+  </div>
+
+  <script>
+    // Register service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').then(reg => {
+        console.log('Service worker registered', reg);
+        document.getElementById('status').textContent = 'Service worker registered.';
+      }).catch(err => {
+        console.warn('SW registration failed', err);
+        document.getElementById('status').textContent = 'Service worker registration failed.';
+      });
+    } else {
+      document.getElementById('status').textContent = 'Service workers not supported in this browser.';
+    }
+
+    // Show install prompt when available
+    let deferredPrompt;
+    const installBtn = document.getElementById('installBtn');
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.hidden = false;
+    });
+    installBtn.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      document.getElementById('status').textContent = choice.outcome === 'accepted' ? 'App installed' : 'Installation dismissed';
+      deferredPrompt = null;
+      installBtn.hidden = true;
+    });
+
+    // --- Product list logic ---
+    const PRODUCTS_URL = 'products.json';
+    const productsTable = document.getElementById('productsTable');
+    const totalWeightEl = document.getElementById('totalWeight');
+    const totalBatchesEl = document.getElementById('totalBatches');
+    const selectedListEl = document.getElementById('selectedList');
+    const copyBtn = document.getElementById('copyBtn');
+    const copyStatus = document.getElementById('copyStatus');
+
+    let products = [];
+  const STORAGE_KEY = 'dough_products_v1';
+
+    function formatG(n){ return Math.round(n) + ' g'; }
+
+    async function loadProducts(){
+      try{
+        // try load from localStorage first
+        const local = localStorage.getItem(STORAGE_KEY);
+        if(local){
+          products = JSON.parse(local);
+        } else {
+          const res = await fetch(PRODUCTS_URL);
+          products = await res.json();
+        }
+        // ensure qty defaults
+        products = products.map(p => ({...p, qty: p.qty || 0}));
+        renderProducts();
+      }catch(err){
+        document.getElementById('status').textContent = 'Erro ao carregar products.json';
+        console.error(err);
+      }
+    }
+
+    function createRow(product, idx){
+      const tr = document.createElement('tr');
+
+      const nameTd = document.createElement('td');
+      nameTd.className = 'product-name';
+      nameTd.textContent = `${product.name} (${product.weight} g)`;
+
+      const controlsTd = document.createElement('td');
+      controlsTd.style.textAlign = 'right';
+
+      const controls = document.createElement('div');
+      controls.className = 'qty-controls';
+
+      const minus = document.createElement('button');
+      minus.type = 'button';
+      minus.textContent = '-';
+      minus.title = 'Diminuir';
+  minus.className = 'btn-minus';
+  minus.addEventListener('click', () => { updateQty(idx, products[idx].qty - 1); });
+
+      const qtyInput = document.createElement('input');
+      qtyInput.type = 'number';
+      qtyInput.min = '0';
+      qtyInput.value = product.qty;
+      qtyInput.addEventListener('change', () => {
+        let v = parseInt(qtyInput.value) || 0;
+        if (v < 0) v = 0;
+        updateQty(idx, v);
+      });
+
+      const plus = document.createElement('button');
+      plus.type = 'button';
+      plus.textContent = '+';
+      plus.title = 'Aumentar';
+  plus.className = 'btn-plus';
+  plus.addEventListener('click', () => { updateQty(idx, products[idx].qty + 1); });
+
+      const subtotal = document.createElement('div');
+      subtotal.style.minWidth = '90px';
+      subtotal.style.textAlign = 'right';
+      subtotal.className = 'muted';
+      subtotal.textContent = '0 g';
+
+      controls.appendChild(minus);
+      controls.appendChild(qtyInput);
+      controls.appendChild(plus);
+
+      controlsTd.appendChild(controls);
+      controlsTd.appendChild(subtotal);
+
+      tr.appendChild(nameTd);
+      tr.appendChild(controlsTd);
+
+      // store references
+      // attach edit/delete on double click only on the product name (avoid triggering when clicking +/-)
+      nameTd.addEventListener('dblclick', (e) => {
+        e.stopPropagation();
+        showEditControls(tr, idx);
+      });
+
+      tr._qtyInput = qtyInput;
+      tr._subtotal = subtotal;
+      return tr;
+    }
+
+    function showEditControls(row, idx){
+      // if controls already present, ignore
+      if(row._editShown) return;
+      row._editShown = true;
+      const editWrap = document.createElement('div');
+      editWrap.style.display = 'flex';
+      editWrap.style.gap = '8px';
+      editWrap.style.marginTop = '8px';
+
+      const nameInput = document.createElement('input');
+      nameInput.type = 'text';
+      nameInput.value = products[idx].name;
+      nameInput.style.flex = '1';
+      const weightInput = document.createElement('input');
+      weightInput.type = 'number';
+      weightInput.value = products[idx].weight;
+      weightInput.style.width = '96px';
+
+      const saveBtn = document.createElement('button');
+      saveBtn.textContent = 'Salvar';
+      saveBtn.addEventListener('click', () => {
+        const newName = nameInput.value.trim() || products[idx].name;
+        const newWeight = Math.max(0, parseInt(weightInput.value) || products[idx].weight);
+        products[idx].name = newName;
+        products[idx].weight = newWeight;
+        persistProducts();
+        renderProducts();
+      });
+
+      const delBtn = document.createElement('button');
+      delBtn.textContent = 'Excluir';
+      delBtn.style.background = 'var(--danger)';
+      delBtn.style.color = 'white';
+      delBtn.addEventListener('click', () => {
+        if(!confirm('Excluir este produto?')) return;
+        products.splice(idx,1);
+        persistProducts();
+        renderProducts();
+      });
+
+      editWrap.appendChild(nameInput);
+      editWrap.appendChild(weightInput);
+      editWrap.appendChild(saveBtn);
+      editWrap.appendChild(delBtn);
+
+      // append below the row
+      const container = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 2;
+      td.appendChild(editWrap);
+      container.appendChild(td);
+      row.parentNode.insertBefore(container, row.nextSibling);
+      row._editRow = container;
+    }
+
+    function persistProducts(){
+      // save base fields only
+      const toSave = products.map(p => ({name:p.name, weight:p.weight, qty:p.qty || 0}));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+    }
+
+    function renderProducts(){
+      productsTable.innerHTML = '';
+      products.forEach((p, i) => productsTable.appendChild(createRow(p,i)));
+      refreshAll();
+    }
+
+    function updateQty(idx, newQty){
+      if (newQty < 0) newQty = 0;
+      products[idx].qty = newQty;
+      // update UI row
+      const row = productsTable.children[idx];
+      row._qtyInput.value = products[idx].qty;
+      row._subtotal.textContent = formatG(products[idx].qty * products[idx].weight);
+      refreshAll();
+      persistProducts();
+    }
+
+    function refreshAll(){
+      const total = products.reduce((s,p) => s + (p.qty * p.weight), 0);
+      totalWeightEl.textContent = total;
+      const batches = Math.ceil(total / 350) || 0;
+      totalBatchesEl.textContent = batches;
+
+      // update subtotals for any that changed (in case of load)
+      products.forEach((p,i) => {
+        const row = productsTable.children[i];
+        if (row) row._subtotal.textContent = formatG(p.qty * p.weight);
+      });
+
+      // build selected list
+      const selected = products.filter(p => p.qty > 0).map(p => `${p.name} - ${p.qty}`);
+      selectedListEl.value = selected.join('\n');
+    }
+
+    copyBtn.addEventListener('click', async () => {
+      try{
+        await navigator.clipboard.writeText(selectedListEl.value);
+        copyStatus.textContent = 'Copiado!';
+        setTimeout(()=> copyStatus.textContent = '', 2000);
+      }catch(err){
+        copyStatus.textContent = 'Falha ao copiar';
+        console.error(err);
+      }
+    });
+
+    // --- Add / Import / Export ---
+    const addBtn = document.getElementById('addBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const importBtn = document.getElementById('importBtn');
+    const importFile = document.getElementById('importFile');
+
+    addBtn.addEventListener('click', () => {
+      // show quick add inputs at top
+      if(document.getElementById('quickAdd')) return;
+      const tr = document.createElement('tr');
+      tr.id = 'quickAdd';
+      const tdName = document.createElement('td');
+      const nameInput = document.createElement('input');
+      nameInput.placeholder = 'Nome do produto';
+      nameInput.style.width = '100%';
+      tdName.appendChild(nameInput);
+
+      const tdRight = document.createElement('td');
+      tdRight.style.textAlign = 'right';
+      const weightInput = document.createElement('input');
+      weightInput.type = 'number';
+      weightInput.placeholder = 'peso (g)';
+      weightInput.style.width = '90px';
+      const save = document.createElement('button');
+      save.textContent = 'Salvar';
+      save.style.marginLeft = '8px';
+      save.addEventListener('click', () => {
+        const name = (nameInput.value || '').trim();
+        const weight = Math.max(0, parseInt(weightInput.value) || 0);
+        if(!name or w<=0){ alert('Informe nome e peso válidos'); return; }
+        products.push({name, weight, qty:0});
+        persistProducts();
+        renderProducts();
+      });
+      tdRight.appendChild(weightInput);
+      tdRight.appendChild(save);
+
+      tr.appendChild(tdName);
+      tr.appendChild(tdRight);
+      productsTable.insertBefore(tr, productsTable.firstChild);
+      nameInput.focus();
+    });
+
+    exportBtn.addEventListener('click', () => {
+      const data = JSON.stringify(products.map(p=>({name:p.name,weight:p.weight})), null, 2);
+      const blob = new Blob([data], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'products-export.json'; document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    importBtn added...
