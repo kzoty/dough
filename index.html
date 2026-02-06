@@ -78,6 +78,7 @@
     <nav class="tabs-nav" role="tablist" aria-label="Calculadoras">
       <button class="tab-btn active" id="tabMassaBase" role="tab" aria-selected="true" aria-controls="panelMassaBase">Num Massas</button>
       <button class="tab-btn" id="tabNumMassas" role="tab" aria-selected="false" aria-controls="panelNumMassas">Massa Base</button>
+      <button class="tab-btn" id="tabPizzas" role="tab" aria-selected="false" aria-controls="panelPizzas">Pizzas</button>
     </nav>
 
     <!-- Painel 1: Num Massas -->
@@ -194,6 +195,87 @@
         </div>
       </div>
     </section>
+
+    <!-- Painel 3: Pizzas -->
+    <section class="panel" id="panelPizzas" role="tabpanel" aria-labelledby="tabPizzas">
+      <div class="card">
+        <div class="row">
+          <div class="col">
+            <label><span>Nº de pizzas</span><input id="pz-n" type="number" min="1" value="4"></label>
+          </div>
+          <div class="col">
+            <label><span>Peso por bola (g)</span><input id="pz-bola" type="number" min="150" value="250"></label>
+          </div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <div class="col">
+            <label><span>Hidratação final (%)</span><input id="pz-hidrFinal" type="number" min="40" max="90" step="0.5" value="60"></label>
+          </div>
+          <div class="col">
+            <label><span>% da BIGA (%)</span><input id="pz-pctBiga" type="number" min="10" max="90" step="1" value="50"></label>
+          </div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <div class="col">
+            <label><span>Temperatura da BIGA (°C)</span><input id="pz-temp" type="number" min="10" max="35" step="0.5" value="24"></label>
+          </div>
+          <div class="col">
+            <label><span>Tempo da BIGA (h)</span><input id="pz-tempo" type="number" min="4" max="36" step="0.5" value="8"></label>
+          </div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <div class="col">
+            <label><span>Sal (%)</span><input id="pz-sal" type="number" min="1" max="3.5" step="0.1" value="2.5"></label>
+          </div>
+          <div class="col">
+            <label><span>Hidratação da BIGA (%)</span><input id="pz-hidrBiga" type="number" min="40" max="60" step="0.5" value="45"></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin:0 0 8px 0">Totais</h3>
+        <div class="row"><div class="col">Peso total da massa</div><div class="pill" id="pz-totalMassa">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Farinha total</div><div class="pill" id="pz-farTotal">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Água total</div><div class="pill" id="pz-aguaTotal">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Sal total</div><div class="pill" id="pz-salTotal">0 g</div></div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin:0 0 8px 0">BIGA</h3>
+        <div class="row"><div class="col">Farinha BIGA</div><div class="pill" id="pz-farBiga">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Água BIGA</div><div class="pill" id="pz-aguaBiga">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Fermento BIGA</div><div class="pill" id="pz-ferBiga">0 g</div></div>
+        <p class="hint" id="pz-bigaInstr" style="margin-top:8px"></p>
+      </div>
+
+      <div class="card">
+        <h3 style="margin:0 0 8px 0">Massa Final</h3>
+        <div class="row"><div class="col">Farinha (restante)</div><div class="pill" id="pz-farFinal">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Água (restante)</div><div class="pill" id="pz-aguaFinal">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Sal (total)</div><div class="pill" id="pz-salOut">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Fermento adicional</div><div class="pill">0 g</div></div>
+      </div>
+
+      <div class="card" style="background:#0b0f19;border:1px solid #111827">
+        <h3 style="margin:0 0 8px 0">Resumo</h3>
+        <textarea id="pz-resumo" readonly></textarea>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn primary" id="pz-copy">Copiar resumo</button>
+          <span class="hint" id="pz-copyStatus"></span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin:0 0 8px 0">Validações</h3>
+        <div class="hint" id="pz-warnings"></div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin:0 0 8px 0">Ponto ideal da BIGA</h3>
+        <p class="hint">A biga estará pronta quando apresentar estrutura quebradiça, aroma levemente adocicado/lácteo, sem colapso ou odor alcoólico forte.</p>
+      </div>
+    </section>
   </div>
 
   <script>
@@ -231,7 +313,8 @@
       const TAB_KEY = 'tab_active_calc_v1';
       const tabs = [
         {btn: document.getElementById('tabMassaBase'), panel: document.getElementById('panelMassaBase'), id: 'base'},
-        {btn: document.getElementById('tabNumMassas'), panel: document.getElementById('panelNumMassas'), id: 'num'}
+        {btn: document.getElementById('tabNumMassas'), panel: document.getElementById('panelNumMassas'), id: 'num'},
+        {btn: document.getElementById('tabPizzas'), panel: document.getElementById('panelPizzas'), id: 'pizzas'}
       ];
       function activate(id){
         tabs.forEach(t => {
@@ -244,7 +327,7 @@
       }
       tabs.forEach(t => t.btn.addEventListener('click', () => activate(t.id)));
       let last = null; try{ last = localStorage.getItem(TAB_KEY);}catch(e){}
-      activate(last === 'num' ? 'num' : 'base');
+      activate(['num','pizzas'].includes(last) ? last : 'base');
     })();
 
     // Helpers
@@ -593,6 +676,106 @@
       });
 
       load();
+    })();
+
+    // --- Pizzas (BIGA) ---
+    (function(){
+      const SKEY = 'tab_calc_pizzas_v1';
+      const $ = id => document.getElementById(id);
+      // inputs
+      const n=$('pz-n'), bola=$('pz-bola'), hidrFinal=$('pz-hidrFinal'), pctBiga=$('pz-pctBiga'), temp=$('pz-temp'), tempo=$('pz-tempo'), sal=$('pz-sal'), hidrBiga=$('pz-hidrBiga');
+      // outputs
+      const totalMassa=$('pz-totalMassa'), farTotal=$('pz-farTotal'), aguaTotal=$('pz-aguaTotal'), salTotal=$('pz-salTotal');
+      const farBiga=$('pz-farBiga'), aguaBiga=$('pz-aguaBiga'), ferBiga=$('pz-ferBiga'), bigaInstr=$('pz-bigaInstr');
+      const farFinal=$('pz-farFinal'), aguaFinal=$('pz-aguaFinal'), salOut=$('pz-salOut');
+      const resumo=$('pz-resumo'), copyBtn=$('pz-copy'), copyStatus=$('pz-copyStatus'), warnings=$('pz-warnings');
+
+      function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+
+      function recalc(){
+        const N = Math.max(1, parseInt(n.value||'0'));
+        const PB = Math.max(1, parseFloat(bola.value||'0'));
+        const HF = Math.max(0, parseFloat(hidrFinal.value||'60'))/100; // fração
+        const PCTB = Math.max(0, parseFloat(pctBiga.value||'50'))/100; // fração
+        const T = parseFloat(temp.value||'24');
+        const H = Math.max(1, parseFloat(tempo.value||'8'));
+        const SAL = Math.max(0, parseFloat(sal.value||'2.5'))/100; // fração
+        const HB = Math.max(0, parseFloat(hidrBiga.value||'45'))/100; // fração
+
+        const pesoTot = N * PB;
+        const farinhaTot = pesoTot / (1 + HF + SAL);
+        const aguaTot = farinhaTot * HF;
+        const salTot = farinhaTot * SAL;
+
+        const fBiga = farinhaTot * PCTB;
+        const fFinal = farinhaTot - fBiga;
+        const aBiga = fBiga * HB;
+        const aFinal = Math.max(0, aguaTot - aBiga);
+
+        const fermentoBase = 0.22/100; // 0,22%
+        let fatorTemp = 1.0;
+        if (T <= 20) fatorTemp = 1.15; else if (T <= 22) fatorTemp = 1.05; else if (T <= 24) fatorTemp = 1.00; else if (T <= 26) fatorTemp = 0.90; else fatorTemp = 0.80;
+        const fatorTempo = clamp(8 / H, 0.7, 1.3);
+        const fermPctFinal = fermentoBase * fatorTemp * fatorTempo; // fração
+        const fBigaFer = fBiga * fermPctFinal;
+
+        // set outputs
+        totalMassa.textContent = fmt(pesoTot);
+        farTotal.textContent = fmt(farinhaTot);
+        aguaTotal.textContent = fmt(aguaTot);
+        salTotal.textContent = fmt(salTot);
+
+        farBiga.textContent = fmt(fBiga);
+        aguaBiga.textContent = fmt(aBiga);
+        ferBiga.textContent = fmt(fBigaFer);
+        farFinal.textContent = fmt(fFinal);
+        aguaFinal.textContent = fmt(aFinal);
+        salOut.textContent = fmt(salTot);
+        bigaInstr.textContent = `Fermentar por ${H} horas a ${Math.round(T)} °C, coberto, sem vedar totalmente.`;
+
+        // warnings
+        const ws=[];
+        const HFp=HF*100, PCTBp=PCTB*100, HBp=HB*100;
+        if (HFp < 55 || HFp > 70) ws.push('Atenção: hidratação final fora do intervalo 55–70%.');
+        if (PCTBp < 30 || PCTBp > 70) ws.push('Atenção: percentual de BIGA fora do intervalo 30–70%.');
+        if (HBp < 44 || HBp > 50) ws.push('Atenção: hidratação da BIGA fora do intervalo 44–50%.');
+        if (T > 28) ws.push('Alerta crítico: temperatura da BIGA acima de 28 °C (risco de colapso).');
+        warnings.innerHTML = ws.length ? ws.map(s=>`• ${s}`).join('<br>') : 'Parâmetros dentro dos limites recomendados.';
+
+        // resumo
+        const lines = [
+          `--- PIZZAS (BIGA) ---`,
+          `N=${N} | bola=${PB}g | hidrFinal=${Math.round(HFp*10)/10}% | pctBiga=${Math.round(PCTBp*10)/10}% | sal=${Math.round(SAL*1000)/10}%`,
+          `temp=${Math.round(T)}°C | tempo=${H}h | hidrBiga=${Math.round(HBp*10)/10}%`,
+          '',
+          'BIGA',
+          `* FAR: ${Math.round(fBiga*10)/10}g`,
+          `* H2O: ${Math.round(aBiga*10)/10}g`,
+          `* FER: ${Math.round(fBigaFer*10)/10}g`,
+          '',
+          'MASSA FINAL',
+          `* FAR: ${Math.round(fFinal*10)/10}g`,
+          `* H2O: ${Math.round(aFinal*10)/10}g`,
+          `* SAL: ${Math.round(salTot*10)/10}g`,
+          `* FER: 0g`,
+        ];
+        resumo.value = lines.join('\n');
+
+        // persist
+        try{ localStorage.setItem(SKEY, JSON.stringify({N:n.value,PB:bola.value,HF:hidrFinal.value,PCTB:pctBiga.value,T:temp.value,H:tempo.value,SAL:sal.value,HB:hidrBiga.value})); }catch(e){}
+      }
+
+      // load
+      (function(){
+        try{ const raw = localStorage.getItem(SKEY); if(!raw) return; const s = JSON.parse(raw);
+          if(s.N!=null) n.value=s.N; if(s.PB!=null) bola.value=s.PB; if(s.HF!=null) hidrFinal.value=s.HF; if(s.PCTB!=null) pctBiga.value=s.PCTB; if(s.T!=null) temp.value=s.T; if(s.H!=null) tempo.value=s.H; if(s.SAL!=null) sal.value=s.SAL; if(s.HB!=null) hidrBiga.value=s.HB;
+        }catch(e){}
+      })();
+
+      [n,bola,hidrFinal,pctBiga,temp,tempo,sal,hidrBiga].forEach(i=>{ if(i){ i.addEventListener('input', recalc); i.addEventListener('change', recalc); } });
+      if (copyBtn) copyBtn.addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(resumo.value); copyStatus.textContent='Copiado!'; setTimeout(()=>copyStatus.textContent='',1800);}catch(e){ copyStatus.textContent='Falha ao copiar'; } });
+
+      recalc();
     })();
   </script>
 </body>
