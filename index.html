@@ -79,6 +79,7 @@
       <button class="tab-btn active" id="tabMassaBase" role="tab" aria-selected="true" aria-controls="panelMassaBase">Num Massas</button>
       <button class="tab-btn" id="tabNumMassas" role="tab" aria-selected="false" aria-controls="panelNumMassas">Massa Base</button>
       <button class="tab-btn" id="tabPizzas" role="tab" aria-selected="false" aria-controls="panelPizzas">Pizzas</button>
+      <button class="tab-btn" id="tabMassaZ" role="tab" aria-selected="false" aria-controls="panelMassaZ">MassaZ</button>
     </nav>
 
     <!-- Painel 1: Num Massas -->
@@ -276,6 +277,57 @@
         <p class="hint">A biga estará pronta quando apresentar estrutura quebradiça, aroma levemente adocicado/lácteo, sem colapso ou odor alcoólico forte.</p>
       </div>
     </section>
+
+    <!-- Painel 4: MassaZ -->
+    <section class="panel" id="panelMassaZ" role="tabpanel" aria-labelledby="tabMassaZ">
+      <div class="card">
+        <div class="row">
+          <div class="col">
+            <label>
+              <span>Nº de massas <span class="hint">(350 g cada)</span></span>
+              <input id="mz-n" type="number" min="1" value="10">
+            </label>
+          </div>
+          <div class="col">
+            <label>
+              <span>Hidratação <span class="hint">(% água / farinha)</span></span>
+              <input id="mz-h" type="number" min="40" max="90" step="0.5" value="63">
+            </label>
+          </div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <div class="col">
+            <label>
+              <span>Sal <span class="hint">(% / farinha)</span></span>
+              <input id="mz-s" type="number" min="0.5" max="3" step="0.1" value="1.5">
+            </label>
+          </div>
+          <div class="col">
+            <label>
+              <span>Fermento <span class="hint">(% / farinha)</span></span>
+              <input id="mz-y" type="number" min="0" max="2" step="0.05" value="0.3">
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin:0 0 8px 0">Receita final</h3>
+        <div class="row"><div class="col">Farinha</div><div class="pill" id="mz-far">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Água</div><div class="pill" id="mz-agua">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Sal</div><div class="pill" id="mz-sal">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Fermento</div><div class="pill" id="mz-fer">0 g</div></div>
+      </div>
+
+      <div class="card" style="background:#0b0f19;border:1px solid #111827">
+        <h3 style="margin:0 0 8px 0">Resumo</h3>
+        <textarea id="mz-resumo" readonly></textarea>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn primary" id="mz-copy">Copiar resumo</button>
+          <span class="hint" id="mz-copyStatus"></span>
+        </div>
+      </div>
+    </section>
   </div>
 
   <script>
@@ -314,7 +366,8 @@
       const tabs = [
         {btn: document.getElementById('tabMassaBase'), panel: document.getElementById('panelMassaBase'), id: 'base'},
         {btn: document.getElementById('tabNumMassas'), panel: document.getElementById('panelNumMassas'), id: 'num'},
-        {btn: document.getElementById('tabPizzas'), panel: document.getElementById('panelPizzas'), id: 'pizzas'}
+        {btn: document.getElementById('tabPizzas'), panel: document.getElementById('panelPizzas'), id: 'pizzas'},
+        {btn: document.getElementById('tabMassaZ'), panel: document.getElementById('panelMassaZ'), id: 'massaz'}
       ];
       function activate(id){
         tabs.forEach(t => {
@@ -327,7 +380,7 @@
       }
       tabs.forEach(t => t.btn.addEventListener('click', () => activate(t.id)));
       let last = null; try{ last = localStorage.getItem(TAB_KEY);}catch(e){}
-      activate(['num','pizzas'].includes(last) ? last : 'base');
+      activate(['num','pizzas','massaz'].includes(last) ? last : 'base');
     })();
 
     // Helpers
@@ -676,6 +729,79 @@
       });
 
       load();
+    })();
+
+    // --- MassaZ (massas base) ---
+    (function(){
+      const SKEY = 'tab_calc_massaz_v1';
+      const $ = id => document.getElementById(id);
+      const nEl = $('mz-n');
+      const hEl = $('mz-h');
+      const sEl = $('mz-s');
+      const yEl = $('mz-y');
+
+      const farEl = $('mz-far');
+      const aguaEl = $('mz-agua');
+      const salEl = $('mz-sal');
+      const ferEl = $('mz-fer');
+
+      const resumo = $('mz-resumo');
+      const copyBtn = $('mz-copy');
+      const copyStatus = $('mz-copyStatus');
+
+      function load(){
+        try{
+          const raw = localStorage.getItem(SKEY);
+          if(!raw) return;
+          const s = JSON.parse(raw);
+          if(s.n!=null) nEl.value = s.n;
+          if(s.h!=null) hEl.value = s.h;
+          if(s.s!=null) sEl.value = s.s;
+          if(s.y!=null) yEl.value = s.y;
+        }catch(e){}
+      }
+      function save(){
+        try{ localStorage.setItem(SKEY, JSON.stringify({n:nEl.value,h:hEl.value,s:sEl.value,y:yEl.value})); }catch(e){}
+      }
+
+      function recalc(){
+        const n = Math.max(1, parseInt(nEl.value||'0'));
+        const h = Math.max(0, parseFloat(hEl.value||'63'))/100; // fração
+        const s = Math.max(0, parseFloat(sEl.value||'1.5'))/100; // fração
+        const y = Math.max(0, parseFloat(yEl.value||'0.3'))/100; // fração
+
+        const massaFinal = n * 350; // g
+        const farinha = massaFinal / (1 + h + s + y);
+        const agua = farinha * h;
+        const sal = farinha * s;
+        const ferm = farinha * y;
+
+        farEl.textContent = fmt(farinha);
+        aguaEl.textContent = fmt(agua);
+        salEl.textContent = fmt(sal);
+        ferEl.textContent = fmt(ferm);
+
+        const lines = [
+          `--- ${n} MASSAS ---`,
+          ``,
+          `hidratação ${Math.round(h*1000)/10} | sal ${Math.round(s*1000)/10} | ferm ${Math.round(y*1000)/10}`,
+          ``,
+          `RECEITA`,
+          ``,
+          `* FAR: ${Math.round(farinha*10)/10}g`,
+          `* H2O: ${Math.round(agua*10)/10}g`,
+          `* SAL: ${Math.round(sal*10)/10}g`,
+          `* FER: ${Math.round(ferm*10)/10}g`,
+        ];
+        resumo.value = lines.join('\n');
+        save();
+      }
+
+      [nEl,hEl,sEl,yEl].forEach(i=>{ if(i){ i.addEventListener('input', recalc); i.addEventListener('change', recalc); } });
+      if (copyBtn) copyBtn.addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(resumo.value); copyStatus.textContent='Copiado!'; setTimeout(()=>copyStatus.textContent='',1800);}catch(e){ copyStatus.textContent='Falha ao copiar'; } });
+
+      load();
+      recalc();
     })();
 
     // --- Pizzas (BIGA) ---
