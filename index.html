@@ -79,6 +79,7 @@
       <button class="tab-btn active" id="tabMassaBase" role="tab" aria-selected="true" aria-controls="panelMassaBase">Num Massas</button>
       <button class="tab-btn" id="tabNumMassas" role="tab" aria-selected="false" aria-controls="panelNumMassas">Massa Base</button>
       <button class="tab-btn" id="tabPizzas" role="tab" aria-selected="false" aria-controls="panelPizzas">Pizzas</button>
+      <button class="tab-btn" id="tabPizzaZ" role="tab" aria-selected="false" aria-controls="panelPizzaZ">PizzaZ</button>
       <button class="tab-btn" id="tabMassaZ" role="tab" aria-selected="false" aria-controls="panelMassaZ">MassaZ</button>
     </nav>
 
@@ -278,6 +279,55 @@
       </div>
     </section>
 
+    <!-- Painel PizzaZ: massa direta (com óleo) -->
+    <section class="panel" id="panelPizzaZ" role="tabpanel" aria-labelledby="tabPizzaZ">
+      <div class="card">
+        <div class="row">
+          <div class="col">
+            <label><span>Nº de pizzas</span><input id="pzZ-n" type="number" min="1" value="10"></label>
+          </div>
+          <div class="col">
+            <label><span>Peso por bola (g)</span><input id="pzZ-bola" type="number" min="100" value="280"></label>
+          </div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <div class="col">
+            <label><span>Hidratação (%)</span><input id="pzZ-hidr" type="number" min="30" max="90" step="0.5" value="60"></label>
+          </div>
+          <div class="col">
+            <label><span>Fermento (%)</span><input id="pzZ-ferm" type="number" min="0" max="5" step="0.1" value="1.4"></label>
+          </div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <div class="col">
+            <label><span>Sal (%)</span><input id="pzZ-sal" type="number" min="0.5" max="5" step="0.1" value="2.5"></label>
+          </div>
+          <div class="col">
+            <label><span>Óleo (%)</span><input id="pzZ-oleo" type="number" min="0" max="10" step="0.1" value="2.0"></label>
+          </div>
+        </div>
+        <p class="hint" style="margin-top:10px">Temperatura ideal da massa: 20–24 °C. Espere ~1h antes de dividir em bolinhas; refrigere por 24h.</p>
+      </div>
+
+      <div class="card">
+        <h3 style="margin:0 0 8px 0">Receita</h3>
+        <div class="row"><div class="col">Farinha</div><div class="pill" id="pzZ-far">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Água</div><div class="pill" id="pzZ-agua">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Fermento</div><div class="pill" id="pzZ-fermOut">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Sal</div><div class="pill" id="pzZ-salOut">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Óleo</div><div class="pill" id="pzZ-oleoOut">0 g</div></div>
+      </div>
+
+      <div class="card" style="background:#0b0f19;border:1px solid #111827">
+        <h3 style="margin:0 0 8px 0">Resumo</h3>
+        <textarea id="pzZ-resumo" readonly></textarea>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn primary" id="pzZ-copy">Copiar resumo</button>
+          <span class="hint" id="pzZ-copyStatus"></span>
+        </div>
+      </div>
+    </section>
+
     <!-- Painel 4: MassaZ -->
     <section class="panel" id="panelMassaZ" role="tabpanel" aria-labelledby="tabMassaZ">
       <div class="card">
@@ -367,6 +417,7 @@
         {btn: document.getElementById('tabMassaBase'), panel: document.getElementById('panelMassaBase'), id: 'base'},
         {btn: document.getElementById('tabNumMassas'), panel: document.getElementById('panelNumMassas'), id: 'num'},
         {btn: document.getElementById('tabPizzas'), panel: document.getElementById('panelPizzas'), id: 'pizzas'},
+        {btn: document.getElementById('tabPizzaZ'), panel: document.getElementById('panelPizzaZ'), id: 'pizzaz'},
         {btn: document.getElementById('tabMassaZ'), panel: document.getElementById('panelMassaZ'), id: 'massaz'}
       ];
       function activate(id){
@@ -380,7 +431,7 @@
       }
       tabs.forEach(t => t.btn.addEventListener('click', () => activate(t.id)));
       let last = null; try{ last = localStorage.getItem(TAB_KEY);}catch(e){}
-      activate(['num','pizzas','massaz'].includes(last) ? last : 'base');
+      activate(['num','pizzas','pizzaz','massaz'].includes(last) ? last : 'base');
     })();
 
     // Helpers
@@ -902,6 +953,80 @@
       if (copyBtn) copyBtn.addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(resumo.value); copyStatus.textContent='Copiado!'; setTimeout(()=>copyStatus.textContent='',1800);}catch(e){ copyStatus.textContent='Falha ao copiar'; } });
 
       recalc();
+    })();
+
+    // --- PizzaZ (massa direta com óleo) ---
+    (function(){
+      const SKEY = 'tab_calc_pizzaz_v1';
+      const $ = id => document.getElementById(id);
+      const n = $('pzZ-n');
+      const bola = $('pzZ-bola');
+      const hidr = $('pzZ-hidr');
+      const ferm = $('pzZ-ferm');
+      const sal = $('pzZ-sal');
+      const oleo = $('pzZ-oleo');
+
+      const farOut = $('pzZ-far');
+      const aguaOut = $('pzZ-agua');
+      const fermOut = $('pzZ-fermOut');
+      const salOut = $('pzZ-salOut');
+      const oleoOut = $('pzZ-oleoOut');
+
+      const resumo = $('pzZ-resumo');
+      const copyBtn = $('pzZ-copy');
+      const copyStatus = $('pzZ-copyStatus');
+
+      function load(){
+        try{ const raw = localStorage.getItem(SKEY); if(!raw) return; const s = JSON.parse(raw);
+          if(s.N!=null) n.value = s.N; if(s.B!=null) bola.value = s.B; if(s.H!=null) hidr.value = s.H; if(s.F!=null) ferm.value = s.F; if(s.S!=null) sal.value = s.S; if(s.O!=null) oleo.value = s.O;
+        }catch(e){}
+      }
+      function save(){ try{ localStorage.setItem(SKEY, JSON.stringify({N:n.value,B:bola.value,H:hidr.value,F:ferm.value,S:sal.value,O:oleo.value})); }catch(e){}
+      }
+
+      function recalc(){
+        const N = Math.max(1, parseInt(n.value||'0'));
+        const PB = Math.max(1, parseFloat(bola.value||'280'));
+        const H = Math.max(0, parseFloat(hidr.value||'60'))/100;
+        const F = Math.max(0, parseFloat(ferm.value||'1.4'))/100;
+        const S = Math.max(0, parseFloat(sal.value||'2.5'))/100;
+        const O = Math.max(0, parseFloat(oleo.value||'2.0'))/100;
+
+        const pesoTot = N * PB;
+        const farinha = pesoTot / (1 + H + F + S + O);
+        const agua = farinha * H;
+        const fermento = farinha * F;
+        const salTot = farinha * S;
+        const oleoTot = farinha * O;
+
+        farOut.textContent = fmt(farinha);
+        aguaOut.textContent = fmt(agua);
+        fermOut.textContent = fmt(fermento);
+        salOut.textContent = fmt(salTot);
+        oleoOut.textContent = fmt(oleoTot);
+
+        const lines = [
+          `--- PIZZAS (com óleo) ---`,
+          `N=${N} | bola=${PB}g | hidratação=${Math.round(H*1000)/10}% | ferm=${Math.round(F*1000)/10}% | sal=${Math.round(S*1000)/10}% | oleo=${Math.round(O*1000)/10}%`,
+          ``,
+          `RECEITA:`,
+          ``,
+          `_FAR: ${Math.round(farinha*10)/10}g`,
+          `_FERM: ${Math.round(fermento*10)/10}g`,
+          `_H2O: ${Math.round(agua*10)/10}g`,
+          `_SAL: ${Math.round(salTot*10)/10}g`,
+          `* OLEO: ${Math.round(oleoTot*10)/10}g`,
+          ``,
+          `Orientação: manter massa entre 20–24 °C. Aguarde ~1h antes de formar bolinhas; levar à geladeira por 24h.`
+        ];
+        resumo.value = lines.join('\n');
+        save();
+      }
+
+      [n,bola,hidr,ferm,sal,oleo].forEach(i=>{ if(i){ i.addEventListener('input', recalc); i.addEventListener('change', recalc); } });
+      if(copyBtn) copyBtn.addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(resumo.value); copyStatus.textContent='Copiado!'; setTimeout(()=>copyStatus.textContent='',1800);}catch(e){ copyStatus.textContent='Falha ao copiar'; } });
+
+      load(); recalc();
     })();
   </script>
 </body>
