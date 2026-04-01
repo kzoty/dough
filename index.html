@@ -56,6 +56,9 @@
     .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#071426;border:0}
     .btn.ghost{background:transparent}
 
+    /* Esconde as abas solicitadas sem remover do HTML */
+    .hidden-tab { display: none !important; }
+
     @media(min-width:560px){
       .wrap{padding:20px}
     }
@@ -74,17 +77,15 @@
       <button class="btn ghost" id="installBtn" hidden>Instalar</button>
     </header>
 
-    <!-- Navegação de abas -->
     <nav class="tabs-nav" role="tablist" aria-label="Calculadoras">
-      <button class="tab-btn active" id="tabMassaBase" role="tab" aria-selected="true" aria-controls="panelMassaBase">Num Massas</button>
-      <button class="tab-btn" id="tabNumMassas" role="tab" aria-selected="false" aria-controls="panelNumMassas">Massa Base</button>
-      <button class="tab-btn" id="tabPizzas" role="tab" aria-selected="false" aria-controls="panelPizzas">Pizzas</button>
-      <button class="tab-btn" id="tabPizzaZ" role="tab" aria-selected="false" aria-controls="panelPizzaZ">PizzaZ</button>
+      <button class="tab-btn active" id="tabNumMassas" role="tab" aria-selected="true" aria-controls="panelNumMassas">Num Massas</button>
       <button class="tab-btn" id="tabMassaZ" role="tab" aria-selected="false" aria-controls="panelMassaZ">MassaZ</button>
+      <button class="tab-btn" id="tabPizzaZ" role="tab" aria-selected="false" aria-controls="panelPizzaZ">PizzaZ</button>
+      <button class="tab-btn hidden-tab" id="tabMassaBase" role="tab" aria-selected="false" aria-controls="panelMassaBase">Massa Base</button>
+      <button class="tab-btn hidden-tab" id="tabPizzas" role="tab" aria-selected="false" aria-controls="panelPizzas">Pizzas</button>
     </nav>
 
-    <!-- Painel 1: Num Massas -->
-    <section class="panel" id="panelNumMassas" role="tabpanel" aria-labelledby="tabNumMassas">
+    <section class="panel active" id="panelNumMassas" role="tabpanel" aria-labelledby="tabNumMassas">
       <div class="card">
         <div class="row">
           <div class="col">
@@ -165,8 +166,115 @@
       </div>
     </section>
 
-    <!-- Painel 2: Massa Base -->
-    <section class="panel active" id="panelMassaBase" role="tabpanel" aria-labelledby="tabMassaBase">
+    <section class="panel" id="panelMassaZ" role="tabpanel" aria-labelledby="tabMassaZ">
+      <div class="card">
+        <div class="row">
+          <div class="col">
+            <label>
+              <span>Nº de massas <span class="hint">(350 g cada)</span></span>
+              <input id="mz-n" type="number" min="1" value="10">
+            </label>
+          </div>
+          <div class="col">
+            <label>
+              <span>Hidratação <span class="hint">(% água / farinha)</span></span>
+              <input id="mz-h" type="number" min="40" max="90" step="0.5" value="63">
+            </label>
+          </div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <div class="col">
+            <label>
+              <span>Sal <span class="hint">(% / farinha)</span></span>
+              <input id="mz-s" type="number" min="0.5" max="3" step="0.1" value="1.5">
+            </label>
+          </div>
+          <div class="col">
+            <label>
+              <span>Fermento <span class="hint">(% / farinha)</span></span>
+              <input id="mz-y" type="number" min="0" max="2" step="0.05" value="0.3">
+            </label>
+          </div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <div class="col">
+            <label>
+              <span>Óleo <span class="hint">(% / farinha)</span></span>
+              <input id="mz-o" type="number" min="0" max="10" step="0.1" value="1.0">
+            </label>
+          </div>
+          <div class="col"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin:0 0 8px 0">Receita final</h3>
+        <div class="row"><div class="col">Farinha</div><div class="pill" id="mz-far">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Água</div><div class="pill" id="mz-agua">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Sal</div><div class="pill" id="mz-sal">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Fermento</div><div class="pill" id="mz-fer">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Óleo</div><div class="pill" id="mz-oleo">0 g</div></div>
+      </div>
+
+      <div class="card" style="background:#0b0f19;border:1px solid #111827">
+        <h3 style="margin:0 0 8px 0">Resumo</h3>
+        <textarea id="mz-resumo" readonly></textarea>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn primary" id="mz-copy">Copiar resumo</button>
+          <span class="hint" id="mz-copyStatus"></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="panelPizzaZ" role="tabpanel" aria-labelledby="tabPizzaZ">
+      <div class="card">
+        <div class="row">
+          <div class="col">
+            <label><span>Nº de pizzas</span><input id="pzZ-n" type="number" min="1" value="10"></label>
+          </div>
+          <div class="col">
+            <label><span>Peso por bola (g)</span><input id="pzZ-bola" type="number" min="100" value="280"></label>
+          </div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <div class="col">
+            <label><span>Hidratação (%)</span><input id="pzZ-hidr" type="number" min="30" max="90" step="0.5" value="60"></label>
+          </div>
+          <div class="col">
+            <label><span>Fermento (%)</span><input id="pzZ-ferm" type="number" min="0" max="5" step="0.1" value="1.4"></label>
+          </div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <div class="col">
+            <label><span>Sal (%)</span><input id="pzZ-sal" type="number" min="0.5" max="5" step="0.1" value="2.5"></label>
+          </div>
+          <div class="col">
+            <label><span>Óleo (%)</span><input id="pzZ-oleo" type="number" min="0" max="10" step="0.1" value="2.0"></label>
+          </div>
+        </div>
+        <p class="hint" style="margin-top:10px">Temperatura ideal da massa: 20–24 °C. Espere ~1h antes de dividir em bolinhas; refrigere por 24h.</p>
+      </div>
+
+      <div class="card">
+        <h3 style="margin:0 0 8px 0">Receita</h3>
+        <div class="row"><div class="col">Farinha</div><div class="pill" id="pzZ-far">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Água</div><div class="pill" id="pzZ-agua">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Fermento</div><div class="pill" id="pzZ-fermOut">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Sal</div><div class="pill" id="pzZ-salOut">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Óleo</div><div class="pill" id="pzZ-oleoOut">0 g</div></div>
+      </div>
+
+      <div class="card" style="background:#0b0f19;border:1px solid #111827">
+        <h3 style="margin:0 0 8px 0">Resumo</h3>
+        <textarea id="pzZ-resumo" readonly></textarea>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn primary" id="pzZ-copy">Copiar resumo</button>
+          <span class="hint" id="pzZ-copyStatus"></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="panelMassaBase" role="tabpanel" aria-labelledby="tabMassaBase">
       <div class="card">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
           <h3 style="margin:0">Massa Base</h3>
@@ -198,7 +306,6 @@
       </div>
     </section>
 
-    <!-- Painel 3: Pizzas -->
     <section class="panel" id="panelPizzas" role="tabpanel" aria-labelledby="tabPizzas">
       <div class="card">
         <div class="row">
@@ -279,105 +386,6 @@
       </div>
     </section>
 
-    <!-- Painel PizzaZ: massa direta (com óleo) -->
-    <section class="panel" id="panelPizzaZ" role="tabpanel" aria-labelledby="tabPizzaZ">
-      <div class="card">
-        <div class="row">
-          <div class="col">
-            <label><span>Nº de pizzas</span><input id="pzZ-n" type="number" min="1" value="10"></label>
-          </div>
-          <div class="col">
-            <label><span>Peso por bola (g)</span><input id="pzZ-bola" type="number" min="100" value="280"></label>
-          </div>
-        </div>
-        <div class="row" style="margin-top:10px">
-          <div class="col">
-            <label><span>Hidratação (%)</span><input id="pzZ-hidr" type="number" min="30" max="90" step="0.5" value="60"></label>
-          </div>
-          <div class="col">
-            <label><span>Fermento (%)</span><input id="pzZ-ferm" type="number" min="0" max="5" step="0.1" value="1.4"></label>
-          </div>
-        </div>
-        <div class="row" style="margin-top:10px">
-          <div class="col">
-            <label><span>Sal (%)</span><input id="pzZ-sal" type="number" min="0.5" max="5" step="0.1" value="2.5"></label>
-          </div>
-          <div class="col">
-            <label><span>Óleo (%)</span><input id="pzZ-oleo" type="number" min="0" max="10" step="0.1" value="2.0"></label>
-          </div>
-        </div>
-        <p class="hint" style="margin-top:10px">Temperatura ideal da massa: 20–24 °C. Espere ~1h antes de dividir em bolinhas; refrigere por 24h.</p>
-      </div>
-
-      <div class="card">
-        <h3 style="margin:0 0 8px 0">Receita</h3>
-        <div class="row"><div class="col">Farinha</div><div class="pill" id="pzZ-far">0 g</div></div>
-        <div class="row" style="margin-top:6px"><div class="col">Água</div><div class="pill" id="pzZ-agua">0 g</div></div>
-        <div class="row" style="margin-top:6px"><div class="col">Fermento</div><div class="pill" id="pzZ-fermOut">0 g</div></div>
-        <div class="row" style="margin-top:6px"><div class="col">Sal</div><div class="pill" id="pzZ-salOut">0 g</div></div>
-        <div class="row" style="margin-top:6px"><div class="col">Óleo</div><div class="pill" id="pzZ-oleoOut">0 g</div></div>
-      </div>
-
-      <div class="card" style="background:#0b0f19;border:1px solid #111827">
-        <h3 style="margin:0 0 8px 0">Resumo</h3>
-        <textarea id="pzZ-resumo" readonly></textarea>
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <button class="btn primary" id="pzZ-copy">Copiar resumo</button>
-          <span class="hint" id="pzZ-copyStatus"></span>
-        </div>
-      </div>
-    </section>
-
-    <!-- Painel 4: MassaZ -->
-    <section class="panel" id="panelMassaZ" role="tabpanel" aria-labelledby="tabMassaZ">
-      <div class="card">
-        <div class="row">
-          <div class="col">
-            <label>
-              <span>Nº de massas <span class="hint">(350 g cada)</span></span>
-              <input id="mz-n" type="number" min="1" value="10">
-            </label>
-          </div>
-          <div class="col">
-            <label>
-              <span>Hidratação <span class="hint">(% água / farinha)</span></span>
-              <input id="mz-h" type="number" min="40" max="90" step="0.5" value="63">
-            </label>
-          </div>
-        </div>
-        <div class="row" style="margin-top:10px">
-          <div class="col">
-            <label>
-              <span>Sal <span class="hint">(% / farinha)</span></span>
-              <input id="mz-s" type="number" min="0.5" max="3" step="0.1" value="1.5">
-            </label>
-          </div>
-          <div class="col">
-            <label>
-              <span>Fermento <span class="hint">(% / farinha)</span></span>
-              <input id="mz-y" type="number" min="0" max="2" step="0.05" value="0.3">
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3 style="margin:0 0 8px 0">Receita final</h3>
-        <div class="row"><div class="col">Farinha</div><div class="pill" id="mz-far">0 g</div></div>
-        <div class="row" style="margin-top:6px"><div class="col">Água</div><div class="pill" id="mz-agua">0 g</div></div>
-        <div class="row" style="margin-top:6px"><div class="col">Sal</div><div class="pill" id="mz-sal">0 g</div></div>
-        <div class="row" style="margin-top:6px"><div class="col">Fermento</div><div class="pill" id="mz-fer">0 g</div></div>
-      </div>
-
-      <div class="card" style="background:#0b0f19;border:1px solid #111827">
-        <h3 style="margin:0 0 8px 0">Resumo</h3>
-        <textarea id="mz-resumo" readonly></textarea>
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <button class="btn primary" id="mz-copy">Copiar resumo</button>
-          <span class="hint" id="mz-copyStatus"></span>
-        </div>
-      </div>
-    </section>
   </div>
 
   <script>
@@ -410,15 +418,16 @@
         });
       }
     })();
+    
     // Tabs
     (function(){
       const TAB_KEY = 'tab_active_calc_v1';
       const tabs = [
-        {btn: document.getElementById('tabMassaBase'), panel: document.getElementById('panelMassaBase'), id: 'base'},
         {btn: document.getElementById('tabNumMassas'), panel: document.getElementById('panelNumMassas'), id: 'num'},
-        {btn: document.getElementById('tabPizzas'), panel: document.getElementById('panelPizzas'), id: 'pizzas'},
+        {btn: document.getElementById('tabMassaZ'), panel: document.getElementById('panelMassaZ'), id: 'massaz'},
         {btn: document.getElementById('tabPizzaZ'), panel: document.getElementById('panelPizzaZ'), id: 'pizzaz'},
-        {btn: document.getElementById('tabMassaZ'), panel: document.getElementById('panelMassaZ'), id: 'massaz'}
+        {btn: document.getElementById('tabMassaBase'), panel: document.getElementById('panelMassaBase'), id: 'base'},
+        {btn: document.getElementById('tabPizzas'), panel: document.getElementById('panelPizzas'), id: 'pizzas'}
       ];
       function activate(id){
         tabs.forEach(t => {
@@ -431,7 +440,9 @@
       }
       tabs.forEach(t => t.btn.addEventListener('click', () => activate(t.id)));
       let last = null; try{ last = localStorage.getItem(TAB_KEY);}catch(e){}
-      activate(['num','pizzas','pizzaz','massaz'].includes(last) ? last : 'base');
+      
+      // Abre por padrão na aba "num" caso a última estivesse definida como uma das removidas
+      activate(['num','massaz','pizzaz'].includes(last) ? last : 'num');
     })();
 
     // Helpers
@@ -553,7 +564,7 @@
       recalc();
     })();
 
-    // --- Massa Base (produtos) ---
+    // --- Massa Base (produtos) (Escondido, mas mantido) ---
     (function(){
       const PRODUCTS_URL = 'products.json';
       const STORAGE_KEY = 'tab_mb_products_v1';
@@ -790,11 +801,13 @@
       const hEl = $('mz-h');
       const sEl = $('mz-s');
       const yEl = $('mz-y');
+      const oEl = $('mz-o'); // Input de Óleo
 
       const farEl = $('mz-far');
       const aguaEl = $('mz-agua');
       const salEl = $('mz-sal');
       const ferEl = $('mz-fer');
+      const oleoEl = $('mz-oleo'); // Output de Óleo
 
       const resumo = $('mz-resumo');
       const copyBtn = $('mz-copy');
@@ -809,10 +822,11 @@
           if(s.h!=null) hEl.value = s.h;
           if(s.s!=null) sEl.value = s.s;
           if(s.y!=null) yEl.value = s.y;
+          if(s.o!=null) oEl.value = s.o;
         }catch(e){}
       }
       function save(){
-        try{ localStorage.setItem(SKEY, JSON.stringify({n:nEl.value,h:hEl.value,s:sEl.value,y:yEl.value})); }catch(e){}
+        try{ localStorage.setItem(SKEY, JSON.stringify({n:nEl.value,h:hEl.value,s:sEl.value,y:yEl.value,o:oEl.value})); }catch(e){}
       }
 
       function recalc(){
@@ -820,22 +834,26 @@
         const h = Math.max(0, parseFloat(hEl.value||'63'))/100; // fração
         const s = Math.max(0, parseFloat(sEl.value||'1.5'))/100; // fração
         const y = Math.max(0, parseFloat(yEl.value||'0.3'))/100; // fração
+        const o = Math.max(0, parseFloat(oEl.value||'1.0'))/100; // fração do óleo
 
         const massaFinal = n * 350; // g
-        const farinha = massaFinal / (1 + h + s + y);
+        // A fórmula agora considera o óleo na soma das proporções
+        const farinha = massaFinal / (1 + h + s + y + o);
         const agua = farinha * h;
         const sal = farinha * s;
         const ferm = farinha * y;
+        const oleo = farinha * o;
 
         farEl.textContent = fmt(farinha);
         aguaEl.textContent = fmt(agua);
         salEl.textContent = fmt(sal);
         ferEl.textContent = fmt(ferm);
+        oleoEl.textContent = fmt(oleo);
 
         const lines = [
           `--- ${n} MASSAS ---`,
           ``,
-          `hidratação ${Math.round(h*1000)/10} | sal ${Math.round(s*1000)/10} | ferm ${Math.round(y*1000)/10}`,
+          `hidratação ${Math.round(h*1000)/10}% | sal ${Math.round(s*1000)/10}% | ferm ${Math.round(y*1000)/10}% | óleo ${Math.round(o*1000)/10}%`,
           ``,
           `RECEITA`,
           ``,
@@ -843,19 +861,20 @@
           `* H2O: ${Math.round(agua*10)/10}g`,
           `* SAL: ${Math.round(sal*10)/10}g`,
           `* FER: ${Math.round(ferm*10)/10}g`,
+          `* OLEO: ${Math.round(oleo*10)/10}g`,
         ];
         resumo.value = lines.join('\n');
         save();
       }
 
-      [nEl,hEl,sEl,yEl].forEach(i=>{ if(i){ i.addEventListener('input', recalc); i.addEventListener('change', recalc); } });
+      [nEl,hEl,sEl,yEl,oEl].forEach(i=>{ if(i){ i.addEventListener('input', recalc); i.addEventListener('change', recalc); } });
       if (copyBtn) copyBtn.addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(resumo.value); copyStatus.textContent='Copiado!'; setTimeout(()=>copyStatus.textContent='',1800);}catch(e){ copyStatus.textContent='Falha ao copiar'; } });
 
       load();
       recalc();
     })();
 
-    // --- Pizzas (BIGA) ---
+    // --- Pizzas (BIGA) (Escondido, mas mantido) ---
     (function(){
       const SKEY = 'tab_calc_pizzas_v1';
       const $ = id => document.getElementById(id);
