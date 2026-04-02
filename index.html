@@ -56,8 +56,11 @@
     .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#071426;border:0}
     .btn.ghost{background:transparent}
 
-    /* Esconde as abas solicitadas sem remover do HTML */
-    .hidden-tab { display: none !important; }
+    /* Esconde as abas não desejadas (Massa Base e Pizzas) e seus painéis */
+    #tabMassaBase, #tabPizzas,
+    #panelMassaBase, #panelPizzas {
+      display: none !important;
+    }
 
     @media(min-width:560px){
       .wrap{padding:20px}
@@ -86,6 +89,38 @@
     </nav>
 
     <section class="panel active" id="panelNumMassas" role="tabpanel" aria-labelledby="tabNumMassas">
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <h3 style="margin:0">Massa Base</h3>
+          <div style="display:flex;gap:8px">
+            <button class="btn" id="mb-add">Adicionar</button>
+            <button class="btn" id="mb-import">Importar JSON</button>
+            <button class="btn" id="mb-export">Exportar JSON</button>
+            <input id="mb-importFile" type="file" accept="application/json" style="display:none">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div id="mb-list" aria-live="polite"></div>
+      </div>
+
+      <div class="card">
+        <div class="row"><div class="col">Total</div><div class="pill" id="mb-total">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Nº massas <span class="hint">(350 g)</span></div><div class="pill" id="mb-batches">0</div></div>
+      </div>
+
+      <div class="card" style="background:#0b0f19;border:1px solid #111827">
+        <h3 style="margin:0 0 8px 0">Lista de produtos selecionados</h3>
+        <textarea id="mb-selected" readonly></textarea>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn primary" id="mb-copy">Copiar lista</button>
+          <span class="hint" id="mb-copyStatus"></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="panelMassaBase" role="tabpanel" aria-labelledby="tabMassaBase">
       <div class="card">
         <div class="row">
           <div class="col">
@@ -270,38 +305,6 @@
         <div style="display:flex;gap:8px;margin-top:8px">
           <button class="btn primary" id="pzZ-copy">Copiar resumo</button>
           <span class="hint" id="pzZ-copyStatus"></span>
-        </div>
-      </div>
-    </section>
-
-    <section class="panel" id="panelMassaBase" role="tabpanel" aria-labelledby="tabMassaBase">
-      <div class="card">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-          <h3 style="margin:0">Massa Base</h3>
-          <div style="display:flex;gap:8px">
-            <button class="btn" id="mb-add">Adicionar</button>
-            <button class="btn" id="mb-import">Importar JSON</button>
-            <button class="btn" id="mb-export">Exportar JSON</button>
-            <input id="mb-importFile" type="file" accept="application/json" style="display:none">
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div id="mb-list" aria-live="polite"></div>
-      </div>
-
-      <div class="card">
-        <div class="row"><div class="col">Total</div><div class="pill" id="mb-total">0 g</div></div>
-        <div class="row" style="margin-top:6px"><div class="col">Nº massas <span class="hint">(350 g)</span></div><div class="pill" id="mb-batches">0</div></div>
-      </div>
-
-      <div class="card" style="background:#0b0f19;border:1px solid #111827">
-        <h3 style="margin:0 0 8px 0">Lista de produtos selecionados</h3>
-        <textarea id="mb-selected" readonly></textarea>
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <button class="btn primary" id="mb-copy">Copiar lista</button>
-          <span class="hint" id="mb-copyStatus"></span>
         </div>
       </div>
     </section>
