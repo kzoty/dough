@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Levain</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #f5f0e8;
+    --warm: #e8dcc8;
+    --brown: #8b6914;
+    --dark: #2c1f0e;
+    --rust: #a8401a;
+    --sage: #5a6b4a;
+    --light-sage: #8fa87d;
+    --shadow: rgba(44,31,14,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--cream);
+    color: var(--dark);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    color: var(--dark);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  header h1 em {
+    color: var(--brown);
+    font-style: italic;
+  }
+
+  header p {
+    color: var(--brown);
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-top: 0.5rem;
+  }
+
+  .breads-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    max-width: 1100px;
+    margin: 0 auto 2.5rem;
+  }
+
+  .bread-card {
+    background: white;
+    border-radius: 2px;
+    border: 1px solid var(--warm);
+    overflow: hidden;
+    box-shadow: 4px 4px 0 var(--warm);
+    transition: box-shadow 0.2s;
+  }
+
+  .bread-card:hover {
+    box-shadow: 6px 6px 0 var(--warm);
+  }
+
+  .card-header {
+    padding: 1rem 1.25rem 0.75rem;
+    border-bottom: 1px solid var(--warm);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .card-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .rustico .card-dot { background: var(--brown); }
+  .gergelim .card-dot { background: var(--rust); }
+  .integral .card-dot { background: var(--sage); }
+
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--dark);
+  }
+
+  .card-body { padding: 1.25rem; }
+
+  .input-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .input-group.full { grid-column: 1 / -1; }
+
+  label {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--brown);
+    font-weight: 500;
+  }
+
+  input[type="number"] {
+    width: 100%;
+    padding: 0.5rem 0.6rem;
+    border: 1px solid var(--warm);
+    border-radius: 2px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--dark);
+    background: var(--cream);
+    transition: border-color 0.15s, background 0.15s;
+    -moz-appearance: textfield;
+  }
+
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+  input[type="number"]:focus {
+    outline: none;
+    border-color: var(--brown);
+    background: white;
+  }
+
+  .input-unit {
+    display: flex;
+    align-items: center;
+    background: var(--cream);
+    border: 1px solid var(--warm);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .input-unit input {
+    border: none;
+    flex: 1;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .input-unit input:focus { background: transparent; }
+
+  .unit-tag {
+    padding: 0 0.5rem;
+    font-size: 0.65rem;
+    color: var(--brown);
+    background: var(--warm);
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    letter-spacing: 0.05em;
+  }
+
+  /* Calc button */
+  .calc-area {
+    max-width: 1100px;
+    margin: 0 auto 2.5rem;
+    text-align: center;
+  }
+
+  .btn-calc {
+    background: var(--dark);
+    color: var(--cream);
+    border: none;
+    padding: 0.9rem 3rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background 0.2s, transform 0.1s;
+  }
+
+  .btn-calc:hover { background: var(--brown); }
+  .btn-calc:active { transform: scale(0.98); }
+
+  /* Results */
+  .results {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: none;
+  }
+
+  .results.visible { display: block; }
+
+  .results-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    color: var(--dark);
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .result-card {
+    background: white;
+    border: 1px solid var(--warm);
+    border-radius: 2px;
+    overflow: hidden;
+    box-shadow: 4px 4px 0 var(--warm);
+  }
+
+  .result-card-header {
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid var(--warm);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .result-card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .result-card-sub {
+    font-size: 0.65rem;
+    color: var(--brown);
+    letter-spacing: 0.08em;
+  }
+
+  .result-rows { padding: 0.5rem 0; }
+
+  .result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.45rem 1.25rem;
+    border-bottom: 1px solid var(--cream);
+    font-size: 0.85rem;
+  }
+
+  .result-row:last-child { border-bottom: none; }
+
+  .result-label {
+    color: var(--brown);
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+  }
+
+  .result-value {
+    font-weight: 500;
+    color: var(--dark);
+  }
+
+  .result-value.highlight {
+    color: var(--rust);
+    font-weight: 700;
+  }
+
+  /* Levain schedule */
+  .schedule-card {
+    background: var(--dark);
+    color: var(--cream);
+    border-radius: 2px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .schedule-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: var(--warm);
+  }
+
+  .schedule-grid {
+    display: grid;
+    grid-template-columns: auto 1fr 1fr 1fr auto;
+    gap: 0.3rem 1rem;
+    font-size: 0.78rem;
+    align-items: center;
+  }
+
+  .schedule-grid .sh { color: var(--brown); font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; border-bottom: 1px solid #444; padding-bottom: 0.3rem; }
+  .schedule-grid .sv { padding: 0.2rem 0; }
+  .schedule-grid .sv.name { color: var(--light-sage); }
+
+  /* Copy output */
+  .copy-section {
+    background: white;
+    border: 1px solid var(--warm);
+    border-radius: 2px;
+    overflow: hidden;
+    box-shadow: 4px 4px 0 var(--warm);
+  }
+
+  .copy-header {
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid var(--warm);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .copy-header-title {
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--brown);
+  }
+
+  .btn-copy {
+    background: var(--sage);
+    color: white;
+    border: none;
+    padding: 0.35rem 0.9rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background 0.2s;
+  }
+
+  .btn-copy:hover { background: var(--dark); }
+  .btn-copy.copied { background: var(--rust); }
+
+  .copy-output {
+    padding: 1.25rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.8;
+    color: var(--dark);
+    white-space: pre;
+    overflow-x: auto;
+  }
+
+  .copy-output .line-header {
+    color: var(--brown);
+    font-weight: 500;
+  }
+
+  .copy-output .line-sep { color: var(--warm); }
+
+  /* Divider */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--warm);
+    margin: 2.5rem auto;
+    max-width: 1100px;
+  }
+
+  @media (max-width: 600px) {
+    .input-row { grid-template-columns: 1fr; }
+    .input-group.full { grid-column: 1; }
+    .schedule-grid { grid-template-columns: auto 1fr 1fr auto; font-size: 0.7rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Calculadora de <em>Levain</em></h1>
+  <p>Fermentação Natural · Receita de Massa</p>
+</header>
+
+<div class="breads-grid">
+
+  <!-- RÚSTICO -->
+  <div class="bread-card rustico">
+    <div class="card-header">
+      <span class="card-dot"></span>
+      <span class="card-title">Rústico</span>
+    </div>
+    <div class="card-body">
+      <div class="input-row">
+        <div class="input-group">
+          <label>Qtd. Pães</label>
+          <div class="input-unit">
+            <input type="number" id="r_qtd" value="0" min="0" step="1">
+            <span class="unit-tag">un</span>
+          </div>
+        </div>
+        <div class="input-group">
+          <label>Peso cada</label>
+          <div class="input-unit">
+            <input type="number" id="r_peso" value="600" min="1">
+            <span class="unit-tag">g</span>
+          </div>
+        </div>
+      </div>
+      <div class="input-row">
+        <div class="input-group">
+          <label>Hidratação</label>
+          <div class="input-unit">
+            <input type="number" id="r_hid" value="68" min="0" max="100" step="0.5">
+            <span class="unit-tag">%</span>
+          </div>
+        </div>
+        <div class="input-group">
+          <label>% de SAL</label>
+          <div class="input-unit">
+            <input type="number" id="r_sal" value="2" min="0" max="10" step="0.1">
+            <span class="unit-tag">%</span>
+          </div>
+        </div>
+      </div>
+      <div class="input-row">
+        <div class="input-group">
+          <label>% de LEVAIN</label>
+          <div class="input-unit">
+            <input type="number" id="r_lev" value="20" min="0" max="100" step="1">
+            <span class="unit-tag">%</span>
+          </div>
+        </div>
+        <div class="input-group">
+          <label>% Far. Integral</label>
+          <div class="input-unit">
+            <input type="number" id="r_int" value="6" min="0" max="100" step="1">
+            <span class="unit-tag">%</span>
+          </div>
+        </div>
+      </div>
+      <div class="input-row">
+        <div class="input-group">
+          <label>% Levain Hidrat.</label>
+          <div class="input-unit">
+            <input type="number" id="r_lhid" value="100" min="0" max="200" step="1">
+            <span class="unit-tag">%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GERGELIM -->
+  <div class="bread-card gergelim">
+    <div class="card-header">
+      <span class="card-dot"></span>
+      <span class="card-title">Gergelim</span>
+    </div>
+    <div class="card-body">
+      <div class="input-row">
+        <div class="input-group">
+          <label>Qtd. Pães</label>
+          <div class="input-unit">
+            <input type="number" id="g_qtd" value="0" min="0" step="1">
+            <span class="unit-tag">un</span>
+          </div>
+        </div>
+        <div class="input-group">
+          <label>Peso cada</label>
+          <div class="input-unit">
+            <input type="number" id="g_peso" value="570" min="1">
+            <span class="unit-tag">g</span>
+          </div>
+        </div>
+      </div>
+      <div class="input-row">
+        <div class="input-group">
+          <label>Hidratação</label>
+          <div class="input-unit">
+            <input type="number" id="g_hid" value="68" min="0" max="100" step="0.5">
+            <span class="unit-tag">%</span>
+          </div>
+        </div>
+        <div class="input-group">
+          <label>% de SAL</label>
+          <div class="input-unit">
+            <input type="number" id="g_sal" value="1.8" min="0" max="10" step="0.1">
+            <span class="unit-tag">%</span>
+          </div>
+        </div>
+      </div>
+      <div class="input-row">
+        <div class="input-group">
+          <label>% de LEVAIN</label>
+          <div class="input-unit">
+            <input type="number" id="g_lev" value="20" min="0" max="100" step="1">
+            <span class="unit-tag">%</span>
+          </div>
+        </div>
+        <div class="input-group">
+          <label>% Far. Integral</label>
+          <div class="input-unit">
+            <input type="number" id="g_int" value="6" min="0" max="100" step="1">
+            <span class="unit-tag">%</span>
+          </div>
+        </div>
+      </div>
+      <div class="input-row">
+        <div class="input-group">
+          <label>% Levain Hidrat.</label>
+          <div class="input-unit">
+            <input type="number" id="g_lhid" value="100" min="0" max="200" step="1">
+            <span class="unit-tag">%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INTEGRAL -->
+  <div class="bread-card integral">
+    <div class="card-header">
+      <span class="card-dot"></span>
+      <span class="card-title">Gergelim Integral</span>
+    </div>
+    <div class="card-body">
+      <div class="input-row">
+        <div class="input-group">
+          <label>Qtd. Pães</label>
+          <div class="input-unit">
+            <input type="number" id="i_qtd" value="6" min="0" step="1">
+            <span class="unit-tag">un</span>
+          </div>
+        </div>
+        <div class="input-group">
+          <label>Peso cada</label>
+          <div class="input-unit">
+            <input type="number" id="i_peso" value="590" min="1">
+            <span class="unit-tag">g</span>
+          </div>
+        </div>
+      </div>
+      <div class="input-row">
+        <div class="input-group">
+          <label>Hidratação</label>
+          <div class="input-unit">
+            <input type="number" id="i_hid" value="75" min="0" max="100" step="0.5">
+            <span class="unit-tag">%</span>
+          </div>
+        </div>
+        <div class="input-group">
+          <label>% de SAL</label>
+          <div class="input-unit">
+            <input type="number" id="i_sal" value="1.8" min="0" max="10" step="0.1">
+            <span class="unit-tag">%</span>
+          </div>
+        </div>
+      </div>
+      <div class="input-row">
+        <div class="input-group">
+          <label>% de LEVAIN</label>
+          <div class="input-unit">
+            <input type="number" id="i_lev" value="20" min="0" max="100" step="1">
+            <span class="unit-tag">%</span>
+          </div>
+        </div>
+        <div class="input-group">
+          <label>% Far. Integral</label>
+          <div class="input-unit">
+            <input type="number" id="i_int" value="60" min="0" max="100" step="1">
+            <span class="unit-tag">%</span>
+          </div>
+        </div>
+      </div>
+      <div class="input-row">
+        <div class="input-group">
+          <label>% Levain Hidrat.</label>
+          <div class="input-unit">
+            <input type="number" id="i_lhid" value="100" min="0" max="200" step="1">
+            <span class="unit-tag">%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="calc-area">
+  <button class="btn-calc" onclick="calcular()">Calcular Receita</button>
+</div>
+
+<div class="results" id="results">
+
+  <h2 class="results-title">Resultado da Receita</h2>
+
+  <div class="results-grid" id="results-grid"></div>
+
+  <div class="schedule-card" id="schedule-card"></div>
+
+  <hr class="divider">
+
+  <div class="copy-section">
+    <div class="copy-header">
+      <span class="copy-header-title">Saída para copiar</span>
+      <button class="btn-copy" id="btn-copy" onclick="copiarTexto()">Copiar</button>
+    </div>
+    <div class="copy-output" id="copy-output"></div>
+  </div>
+
+</div>
+
+<script>
+const FIELDS = ['r_qtd','r_peso','r_hid','r_sal','r_lev','r_int','r_lhid',
+                'g_qtd','g_peso','g_hid','g_sal','g_lev','g_int','g_lhid',
+                'i_qtd','i_peso','i_hid','i_sal','i_lev','i_int','i_lhid'];
+
+function salvarDados() {
+  const dados = {};
+  FIELDS.forEach(id => dados[id] = document.getElementById(id).value);
+  localStorage.setItem('levain_calc', JSON.stringify(dados));
+}
+
+function carregarDados() {
+  try {
+    const dados = JSON.parse(localStorage.getItem('levain_calc'));
+    if (!dados) return;
+    FIELDS.forEach(id => {
+      if (dados[id] !== undefined) document.getElementById(id).value = dados[id];
+    });
+  } catch(e) {}
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  carregarDados();
+  FIELDS.forEach(id => document.getElementById(id).addEventListener('change', salvarDados));
+});
+
+function g(id) { return parseFloat(document.getElementById(id).value) || 0; }
+function round(v) { return Math.round(v); }
+
+function calcBread(qtd, peso, hid, pSal, pLev, pInt, pLhid) {
+  // Fórmula do Excel (aba CalcExato)
+  // Total Farinha = (qtd * peso) * 100 / (100 + hid + pSal)
+  const totalFar = (qtd * peso) * 100 / (100 + hid + pSal);
+  const levain   = totalFar * pLev / 100;
+  const sal      = totalFar * pSal / 100;
+  // Levain Flour = levain * 100 / (100 + pLhid)
+  const levFar   = levain * 100 / (100 + pLhid);
+  const levWat   = levain - levFar;
+  // Flour (net) = totalFar - levFar
+  const flour    = totalFar - levFar;
+  // Water = totalFar * hid/100 - levWat
+  const water    = totalFar * hid / 100 - levWat;
+  // Far Branca = flour * (100 - pInt) / 100
+  const farBranca = round(flour * (100 - pInt) / 100);
+  const farInt    = round(flour - farBranca);
+
+  return {
+    totalFar, levain, sal, levFar, levWat, flour, water,
+    farBranca, farInt,
+    farBrancaR: round(farBranca),
+    farIntR: round(farInt),
+    waterR: round(water),
+    salR: round(sal),
+    levainR: round(levain)
+  };
+}
+
+function calcular() {
+  const r = { qtd: g('r_qtd'), peso: g('r_peso'), hid: g('r_hid'), sal: g('r_sal'), lev: g('r_lev'), int: g('r_int'), lhid: g('r_lhid') };
+  const gg = { qtd: g('g_qtd'), peso: g('g_peso'), hid: g('g_hid'), sal: g('g_sal'), lev: g('g_lev'), int: g('g_int'), lhid: g('g_lhid') };
+  const i  = { qtd: g('i_qtd'), peso: g('i_peso'), hid: g('i_hid'), sal: g('i_sal'), lev: g('i_lev'), int: g('i_int'), lhid: g('i_lhid') };
+
+  const cr = calcBread(r.qtd, r.peso, r.hid, r.sal, r.lev, r.int, r.lhid);
+  const cg = calcBread(gg.qtd, gg.peso, gg.hid, gg.sal, gg.lev, gg.int, gg.lhid);
+  const ci = calcBread(i.qtd, i.peso, i.hid, i.sal, i.lev, i.int, i.lhid);
+
+  // BRANCO (Rústico + Gergelim combinados)
+  const bFarBranca = cr.farBrancaR + cg.farBrancaR;
+  const bFarInt    = cr.farIntR + cg.farIntR;
+  const bWater     = cr.waterR + cg.waterR;
+  const bSal       = cr.salR + cg.salR;
+  const bLevain    = cr.levainR + cg.levainR;
+
+  // Levain schedule (total de todos)
+  const totalLev = cr.levainR + cg.levainR + ci.levainR;
+  const levPortion = round(totalLev / 5);
+  const levPref = round(levPortion / 5);
+  const levOvn  = round(levPref / 2);
+  const levC2   = levPortion * 2;
+  const levPrefC2 = levPref * 2;
+  const levOvnC2 = levOvn % 1 === 0 ? levOvn : levOvn;
+  const levOvnC3 = levOvnC2;
+
+  // Levain components per bread for schedule
+  const rLevPart = round(cr.levainR / 5);
+  const gLevPart = round(cg.levainR / 5);
+  const iLevPart = round(ci.levainR / 5);
+
+  // Schedule rows: Lev | Pré-ferm | Overnight
+  // Lev:  B28=totalLev/5, C28=B28*2, D28=C28 (shared)
+  // Pré:  B29=round(B28/5), C29=B29*2, D29=C29
+  // Ovn:  B30=B29/2, C30=C29+(B30/2), D30=C30
+  const levRow = round(totalLev / 5);
+  const preRow = round(levRow / 5);
+  const ovnB   = round(preRow / 2);
+  const ovnC   = Math.round(preRow * 2 + ovnB / 2);
+  const ovnD   = ovnC;
+
+  renderResults(r, gg, i, cr, cg, ci, bFarBranca, bFarInt, bWater, bSal, bLevain,
+                levRow, preRow, ovnB, ovnC, ovnD);
+  renderSchedule(r, gg, i, cr, cg, ci, levRow, preRow, ovnB, ovnC, ovnD);
+  renderCopy(r, gg, i, cr, cg, ci, bFarBranca, bFarInt, bWater, bSal, bLevain,
+             levRow, preRow, ovnB, ovnC, ovnD);
+
+  document.getElementById('results').classList.add('visible');
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function fmt(v) { return v === 0 ? '0' : v.toLocaleString('pt-BR'); }
+
+function renderResults(r, gg, i, cr, cg, ci, bFarBranca, bFarInt, bWater, bSal, bLevain, levRow, preRow, ovnB, ovnC, ovnD) {
+  const grid = document.getElementById('results-grid');
+  const cards = [
+    {
+      title: 'Rústico', sub: `${r.qtd} pão(ões) × ${r.peso}g`,
+      rows: [
+        ['Far. Branca', cr.farBrancaR + 'g'],
+        ['Far. Integral', cr.farIntR + 'g'],
+        ['Água', cr.waterR + 'g'],
+        ['Sal', cr.salR + 'g'],
+        ['Levain', cr.levainR + 'g', true],
+      ]
+    },
+    {
+      title: 'Gergelim', sub: `${gg.qtd} pão(ões) × ${gg.peso}g`,
+      rows: [
+        ['Far. Branca', cg.farBrancaR + 'g'],
+        ['Far. Integral', cg.farIntR + 'g'],
+        ['Água', cg.waterR + 'g'],
+        ['Sal', cg.salR + 'g'],
+        ['Levain', cg.levainR + 'g', true],
+      ]
+    },
+    {
+      title: 'Gergelim Integral', sub: `${i.qtd} pão(ões) × ${i.peso}g`,
+      rows: [
+        ['Far. Branca', ci.farBrancaR + 'g'],
+        ['Far. Integral', ci.farIntR + 'g'],
+        ['Água', ci.waterR + 'g'],
+        ['Sal', ci.salR + 'g'],
+        ['Levain', ci.levainR + 'g', true],
+      ]
+    },
+    {
+      title: 'Branco (unificado)', sub: 'Rústico + Gergelim',
+      rows: [
+        ['Far. Branca', bFarBranca + 'g'],
+        ['Far. Integral', bFarInt + 'g'],
+        ['Água', bWater + 'g'],
+        ['Sal', bSal + 'g'],
+        ['Levain', bLevain + 'g', true],
+      ]
+    },
+  ];
+
+  grid.innerHTML = cards.map(c => `
+    <div class="result-card">
+      <div class="result-card-header">
+        <span class="result-card-title">${c.title}</span>
+        <span class="result-card-sub">${c.sub}</span>
+      </div>
+      <div class="result-rows">
+        ${c.rows.map(([label, val, hl]) => `
+          <div class="result-row">
+            <span class="result-label">${label}</span>
+            <span class="result-value${hl ? ' highlight' : ''}">${val}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderSchedule(r, gg, i, cr, cg, ci, levRow, preRow, ovnB, ovnC, ovnD) {
+  const card = document.getElementById('schedule-card');
+  const levSum  = levRow * 3; // 3 parcelas (B+C+D)
+  const preSum  = preRow * 3;
+  const ovnSum  = ovnB + ovnC + ovnD;
+
+  card.innerHTML = `
+    <div class="schedule-title">Cronograma do Levain</div>
+    <div class="schedule-grid">
+      <span class="sh"></span>
+      <span class="sh">Starter</span>
+      <span class="sh">×2 Água</span>
+      <span class="sh">×2 Far.</span>
+      <span class="sh">Total</span>
+
+      <span class="sv name">Levain</span>
+      <span class="sv">${levRow}g</span>
+      <span class="sv">${levRow * 2}g</span>
+      <span class="sv">${levRow * 2}g</span>
+      <span class="sv">${levSum}g</span>
+
+      <span class="sv name">Pré-ferm</span>
+      <span class="sv">${preRow}g</span>
+      <span class="sv">${preRow * 2}g</span>
+      <span class="sv">${preRow * 2}g</span>
+      <span class="sv">${preSum}g</span>
+
+      <span class="sv name">Overnight</span>
+      <span class="sv">${ovnB}g</span>
+      <span class="sv">${ovnC}g</span>
+      <span class="sv">${ovnD}g</span>
+      <span class="sv">${ovnSum}g</span>
+    </div>
+  `;
+}
+
+function renderCopy(r, gg, i, cr, cg, ci, bFarBranca, bFarInt, bWater, bSal, bLevain, levRow, preRow, ovnB, ovnC, ovnD) {
+  const header = (txt) => txt;
+  const sep    = () => '---';
+  const line   = (label, val) => `${label.padEnd(10)}${val}`;
+
+  const paoLabels = [];
+  if (r.qtd > 0)  paoLabels.push(`Rústico`);
+  if (gg.qtd > 0) paoLabels.push(`Gergelim`);
+  if (i.qtd > 0)  paoLabels.push(`Integral`);
+  const levPct = r.qtd > 0 ? r.lev : (gg.qtd > 0 ? gg.lev : i.lev);
+
+  const lines = [];
+  lines.push(`${paoLabels.join(' - ')} (${levPct}%)`);
+  lines.push(`Lev  ${ovnB}  ${ovnC}  ${levRow * 2}`);
+  lines.push('');
+  lines.push('BRANCO');
+  lines.push(`F.B  ${bFarBranca}`);
+  lines.push(`F.I  ${bFarInt}`);
+  lines.push(`H2O  ${bWater}`);
+  lines.push(`SAL  ${bSal}`);
+  lines.push(`LEV  ${bLevain}`);
+  lines.push('');
+  lines.push('INTEGRAL');
+  lines.push(`F.B  ${ci.farBrancaR}`);
+  lines.push(`F.I  ${ci.farIntR}`);
+  lines.push(`H2O  ${ci.waterR}`);
+  lines.push(`SAL  ${ci.salR}`);
+  lines.push(`LEV  ${ci.levainR}`);
+
+  document.getElementById('copy-output').textContent = lines.join('\n');
+}
+
+function copiarTexto() {
+  const text = document.getElementById('copy-output').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('btn-copy');
+    btn.textContent = 'Copiado!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'Copiar';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+</script>
+</body>
+</html>

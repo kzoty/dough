@@ -33,7 +33,7 @@
     h1{font-size:1.05rem;margin:0}
     .subtitle{color:var(--muted);font-size:.86rem}
 
-    .tabs-nav{position:sticky;top:0;z-index:10;display:flex;gap:8px;background:transparent;padding:6px 0 2px 0}
+    .tabs-nav{position:sticky;top:0;z-index:10;display:flex;gap:8px;background:transparent;padding:6px 0 2px 0;flex-wrap:wrap;}
     .tab-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:999px;border:1px solid var(--border);background:rgba(12,18,30,.4);color:var(--fg);font-weight:800;cursor:pointer;backdrop-filter: blur(6px)}
     .tab-btn.active{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#0b1020;border-color:transparent;box-shadow:0 10px 28px rgba(124,156,255,.28)}
 
@@ -62,6 +62,15 @@
       display: none !important;
     }
 
+    /* Estilo para iframe da calculadora levain */
+    .levain-iframe {
+      width: 100%;
+      min-height: 850px;
+      border: none;
+      background: transparent;
+      border-radius: var(--radius);
+    }
+
     @media(min-width:560px){
       .wrap{padding:20px}
     }
@@ -84,10 +93,15 @@
       <button class="tab-btn active" id="tabNumMassas" role="tab" aria-selected="true" aria-controls="panelNumMassas">Num Massas</button>
       <button class="tab-btn" id="tabMassaZ" role="tab" aria-selected="false" aria-controls="panelMassaZ">MassaZ</button>
       <button class="tab-btn" id="tabPizzaZ" role="tab" aria-selected="false" aria-controls="panelPizzaZ">PizzaZ</button>
+      <!-- NOVAS ABAS -->
+      <button class="tab-btn" id="tabLevain" role="tab" aria-selected="false" aria-controls="panelLevain">Calc Levain</button>
+      <button class="tab-btn" id="tabMiniPao" role="tab" aria-selected="false" aria-controls="panelMiniPao">Mini Pão</button>
+      <!-- abas ocultas (não exibidas) -->
       <button class="tab-btn" id="tabMassaBase" role="tab" aria-selected="false" aria-controls="panelMassaBase">Massa Base</button>
       <button class="tab-btn" id="tabPizzas" role="tab" aria-selected="false" aria-controls="panelPizzas">Pizzas</button>
     </nav>
 
+    <!-- Painel Num Massas (original) -->
     <section class="panel active" id="panelNumMassas" role="tabpanel" aria-labelledby="tabNumMassas">
       <div class="card">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
@@ -309,6 +323,70 @@
       </div>
     </section>
 
+    <!-- NOVA ABA: CALC LEVAIN (iframe) -->
+    <section class="panel" id="panelLevain" role="tabpanel" aria-labelledby="tabLevain">
+      <div class="card" style="padding: 0; overflow: hidden; background: transparent; border: none; box-shadow: none;">
+        <iframe class="levain-iframe" src="calculadora-levain.html" title="Calculadora de Levain"></iframe>
+      </div>
+    </section>
+
+    <!-- NOVA ABA: MINI PÃO (calculadora com óleo e açúcar separados) -->
+    <section class="panel" id="panelMiniPao" role="tabpanel" aria-labelledby="tabMiniPao">
+      <div class="card">
+        <div class="row">
+          <div class="col">
+            <label><span>Quantidade de pães</span><input type="number" id="mp-qtd" min="1" value="12"></label>
+          </div>
+          <div class="col">
+            <label><span>Peso por pão (g)</span><input type="number" id="mp-peso" min="30" value="50"></label>
+          </div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <div class="col">
+            <label><span>Hidratação (%)</span><input type="number" id="mp-hid" min="40" max="85" step="0.5" value="53"></label>
+          </div>
+          <div class="col">
+            <label><span>Sal (%)</span><input type="number" id="mp-sal" min="0.5" max="3" step="0.1" value="2.0"></label>
+          </div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <div class="col">
+            <label><span>Fermento seco (%)</span><input type="number" id="mp-ferm" min="0.1" max="2" step="0.05" value="1.0"></label>
+          </div>
+          <div class="col">
+            <label><span>Óleo (%)</span><input type="number" id="mp-oleo" min="0" max="10" step="0.5" value="4.0"></label>
+          </div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <div class="col">
+            <label><span>Açúcar (%)</span><input type="number" id="mp-acucar" min="0" max="15" step="0.5" value="8.0"></label>
+          </div>
+          <div class="col"></div>
+        </div>
+        <p class="hint" style="margin-top:8px">Porcentagens sobre o total de farinha. Fermento seco instantâneo.</p>
+      </div>
+
+      <div class="card">
+        <h3 style="margin:0 0 8px 0">Receita final</h3>
+        <div class="row"><div class="col">Farinha total</div><div class="pill" id="mp-far">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Água</div><div class="pill" id="mp-agua">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Sal</div><div class="pill" id="mp-salOut">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Fermento seco</div><div class="pill" id="mp-fermOut">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Óleo</div><div class="pill" id="mp-oleoOut">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Açúcar</div><div class="pill" id="mp-acucarOut">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Massa total</div><div class="pill" id="mp-totalMassa">0 g</div></div>
+      </div>
+
+      <div class="card" style="background:#0b0f19;border:1px solid #111827">
+        <h3 style="margin:0 0 8px 0">Resumo</h3>
+        <textarea id="mp-resumo" readonly></textarea>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn primary" id="mp-copy">Copiar resumo</button>
+          <span class="hint" id="mp-copyStatus"></span>
+        </div>
+      </div>
+    </section>
+
     <section class="panel" id="panelPizzas" role="tabpanel" aria-labelledby="tabPizzas">
       <div class="card">
         <div class="row">
@@ -388,12 +466,156 @@
         <p class="hint">A biga estará pronta quando apresentar estrutura quebradiça, aroma levemente adocicado/lácteo, sem colapso ou odor alcoólico forte.</p>
       </div>
     </section>
-
   </div>
 
   <script>
-    // PWA: registrar service worker e lidar com instalação
+    // ======================= SISTEMA DE TABS DINÂMICO =======================
     (function(){
+      const TAB_KEY = 'tab_active_calc_v1';
+      const allTabs = Array.from(document.querySelectorAll('.tabs-nav .tab-btn'));
+      const visibleTabs = allTabs.filter(btn => {
+        const style = window.getComputedStyle(btn);
+        return style.display !== 'none' && btn.offsetParent !== null;
+      });
+
+      function activateTab(btn) {
+        const panelId = btn.getAttribute('aria-controls');
+        const targetPanel = document.getElementById(panelId);
+        if(!targetPanel) return;
+        document.querySelectorAll('.tab-btn').forEach(b => {
+          b.classList.remove('active');
+          b.setAttribute('aria-selected', 'false');
+        });
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        btn.setAttribute('aria-selected', 'true');
+        targetPanel.classList.add('active');
+        try { localStorage.setItem(TAB_KEY, btn.id); } catch(e) {}
+      }
+
+      visibleTabs.forEach(btn => {
+        btn.addEventListener('click', () => activateTab(btn));
+      });
+
+      let lastTabId = null;
+      try { lastTabId = localStorage.getItem(TAB_KEY); } catch(e) {}
+      let defaultTab = visibleTabs.find(t => t.id === 'tabNumMassas') || visibleTabs[0];
+      let targetTab = null;
+      if(lastTabId) {
+        targetTab = visibleTabs.find(t => t.id === lastTabId);
+      }
+      if(targetTab) activateTab(targetTab);
+      else if(defaultTab) activateTab(defaultTab);
+    })();
+
+    // ======================= FUNÇÕES AUXILIARES =======================
+    const fmt = n => `${Math.round(n*10)/10}g`;
+
+    // ======================= CALCULADORA MINI PÃO (COM ÓLEO E AÇÚCAR SEPARADOS) =======================
+    (function(){
+      const SKEY = 'tab_calc_minipao_v2';  // versão nova para evitar conflito
+      const $ = id => document.getElementById(id);
+      const qtd = $('mp-qtd');
+      const peso = $('mp-peso');
+      const hid = $('mp-hid');
+      const sal = $('mp-sal');
+      const ferm = $('mp-ferm');
+      const oleo = $('mp-oleo');
+      const acucar = $('mp-acucar');
+
+      const farOut = $('mp-far');
+      const aguaOut = $('mp-agua');
+      const salOut = $('mp-salOut');
+      const fermOut = $('mp-fermOut');
+      const oleoOut = $('mp-oleoOut');
+      const acucarOut = $('mp-acucarOut');
+      const totalMassaOut = $('mp-totalMassa');
+      const resumo = $('mp-resumo');
+      const copyBtn = $('mp-copy');
+      const copyStatus = $('mp-copyStatus');
+
+      function load() {
+        try {
+          const raw = localStorage.getItem(SKEY);
+          if(!raw) return;
+          const s = JSON.parse(raw);
+          if(s.q != null) qtd.value = s.q;
+          if(s.p != null) peso.value = s.p;
+          if(s.h != null) hid.value = s.h;
+          if(s.s != null) sal.value = s.s;
+          if(s.f != null) ferm.value = s.f;
+          if(s.o != null) oleo.value = s.o;
+          if(s.a != null) acucar.value = s.a;
+        } catch(e) {}
+      }
+      function save() {
+        try {
+          localStorage.setItem(SKEY, JSON.stringify({
+            q: qtd.value, p: peso.value, h: hid.value, s: sal.value,
+            f: ferm.value, o: oleo.value, a: acucar.value
+          }));
+        } catch(e) {}
+      }
+
+      function recalc() {
+        const n = Math.max(1, parseInt(qtd.value) || 1);
+        const p = Math.max(1, parseFloat(peso.value) || 50);
+        const h = Math.max(0, parseFloat(hid.value) || 53) / 100;
+        const s = Math.max(0, parseFloat(sal.value) || 2.0) / 100;
+        const y = Math.max(0, parseFloat(ferm.value) || 1.0) / 100;
+        const o = Math.max(0, parseFloat(oleo.value) || 4.0) / 100;
+        const a = Math.max(0, parseFloat(acucar.value) || 8.0) / 100;
+
+        const massaTotal = n * p;
+        // farinha = massaTotal / (1 + h + s + y + o + a)
+        const farinha = massaTotal / (1 + h + s + y + o + a);
+        const agua = farinha * h;
+        const salG = farinha * s;
+        const fermG = farinha * y;
+        const oleoG = farinha * o;
+        const acucarG = farinha * a;
+
+        farOut.textContent = fmt(farinha);
+        aguaOut.textContent = fmt(agua);
+        salOut.textContent = fmt(salG);
+        fermOut.textContent = fmt(fermG);
+        oleoOut.textContent = fmt(oleoG);
+        acucarOut.textContent = fmt(acucarG);
+        totalMassaOut.textContent = fmt(massaTotal);
+
+        const lines = [
+          `--- MINI PÃES ---`,
+          `${n} pães de ${p}g cada | hidratação ${Math.round(h*1000)/10}% | sal ${Math.round(s*1000)/10}% | fermento ${Math.round(y*1000)/10}% | óleo ${Math.round(o*1000)/10}% | açúcar ${Math.round(a*1000)/10}%`,
+          ``,
+          `RECEITA:`,
+          `FARINHA: ${Math.round(farinha*10)/10}g`,
+          `ÁGUA: ${Math.round(agua*10)/10}g`,
+          `SAL: ${Math.round(salG*10)/10}g`,
+          `FERMENTO SECO: ${Math.round(fermG*10)/10}g`,
+          `ÓLEO: ${Math.round(oleoG*10)/10}g`,
+          `AÇÚCAR: ${Math.round(acucarG*10)/10}g`,
+          ``,
+          `Modo de preparo: Misturar secos (farinha, sal, açúcar, fermento), adicionar água e óleo, sovar até véu. Deixar fermentar até dobrar de volume (~1h30). Modelar e assar.`
+        ];
+        resumo.value = lines.join('\n');
+        save();
+      }
+
+      [qtd, peso, hid, sal, ferm, oleo, acucar].forEach(i => { if(i) { i.addEventListener('input', recalc); i.addEventListener('change', recalc); } });
+      if(copyBtn) copyBtn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(resumo.value);
+          copyStatus.textContent = 'Copiado!';
+          setTimeout(() => copyStatus.textContent = '', 2000);
+        } catch(e) { copyStatus.textContent = 'Falha'; }
+      });
+      load();
+      recalc();
+    })();
+
+    // ======================= DEMAIS SCRIPTS ORIGINAIS (PRESERVADOS) =======================
+    // PWA
+    (function pwa(){
       const statusEl = document.getElementById('status');
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js').then(reg => {
@@ -421,157 +643,11 @@
         });
       }
     })();
-    
-    // Tabs
-    (function(){
-      const TAB_KEY = 'tab_active_calc_v1';
-      const tabs = [
-        {btn: document.getElementById('tabNumMassas'), panel: document.getElementById('panelNumMassas'), id: 'num'},
-        {btn: document.getElementById('tabMassaZ'), panel: document.getElementById('panelMassaZ'), id: 'massaz'},
-        {btn: document.getElementById('tabPizzaZ'), panel: document.getElementById('panelPizzaZ'), id: 'pizzaz'},
-        {btn: document.getElementById('tabMassaBase'), panel: document.getElementById('panelMassaBase'), id: 'base'},
-        {btn: document.getElementById('tabPizzas'), panel: document.getElementById('panelPizzas'), id: 'pizzas'}
-      ];
-      function activate(id){
-        tabs.forEach(t => {
-          const active = t.id === id;
-          t.btn.classList.toggle('active', active);
-          t.btn.setAttribute('aria-selected', String(active));
-          t.panel.classList.toggle('active', active);
-        });
-        try{ localStorage.setItem(TAB_KEY, id); }catch(e){}
-      }
-      tabs.forEach(t => t.btn.addEventListener('click', () => activate(t.id)));
-      let last = null; try{ last = localStorage.getItem(TAB_KEY);}catch(e){}
-      
-      // Abre por padrão na aba "num" caso a última estivesse definida como uma das removidas
-      activate(['num','massaz','pizzaz'].includes(last) ? last : 'num');
-    })();
 
-    // Helpers
-    const fmt = n => `${Math.round(n*10)/10}g`;
-
-    // Calculadora Num Massas (baseada na lógica atual)
-    (function(){
-      const SKEY = 'tab_calc_nm_v1';
-      const el = id => document.getElementById(id);
-      const nM = el('nm-nMassas');
-      const pPct = el('nm-poolishPct');
-      const hPct = el('nm-aguaPct');
-      const sPct = el('nm-salPct');
-      const yPct = el('nm-fermentoPct');
-      const tC = el('nm-tempC');
-
-      const massaTotal = el('nm-massaTotal');
-      const farinhaTotal = el('nm-farinhaTotal');
-      const aguaTotal = el('nm-aguaTotal');
-      const salTotal = el('nm-salTotal');
-      const fermTotal = el('nm-fermentoTotal');
-
-      const pFar = el('nm-poolishFarinha');
-      const pAgua = el('nm-poolishAgua');
-      const pFer = el('nm-poolishFermento');
-      const pPeso = el('nm-poolishPeso');
-      const pInstr = el('nm-poolishInstr');
-
-      const fFar = el('nm-finFarinha');
-      const fAgua = el('nm-finAgua');
-      const fSal = el('nm-finSal');
-      const fFer = el('nm-finFermento');
-
-      const resumo = el('nm-resumo');
-      const copyBtn = el('nm-copy');
-      const copyStatus = el('nm-copyStatus');
-
-      function load(){
-        try{ const raw = localStorage.getItem(SKEY); if(!raw) return; const s = JSON.parse(raw);
-          if(s.nM!=null) nM.value = s.nM; if(s.pPct!=null) pPct.value = s.pPct; if(s.hPct!=null) hPct.value = s.hPct; if(s.sPct!=null) sPct.value = s.sPct; if(s.yPct!=null) yPct.value = s.yPct; if(s.tC!=null) tC.value = s.tC;
-        }catch(e){}
-      }
-      function save(){
-        try{ localStorage.setItem(SKEY, JSON.stringify({nM:nM.value,pPct:pPct.value,hPct:hPct.value,sPct:sPct.value,yPct:yPct.value,tC:tC.value})); }catch(e){}
-      }
-
-      function recalc(){
-        const n = Math.max(1, parseInt(nM.value||'0'));
-        const massTot = n*350;
-        const h = Math.max(0, parseFloat(hPct.value||'62'))/100;
-        const s = Math.max(0, parseFloat(sPct.value||'1.5'))/100;
-        const y = Math.max(0, parseFloat(yPct.value||'0.3'))/100;
-        const pool = Math.max(0, Math.min(0.8, parseFloat(pPct.value||'30')/100));
-        const temp = parseFloat(tC.value||'25');
-
-        const farTot = massTot / (1 + h + s + y);
-        const aguTot = farTot * h;
-        const salTot = farTot * s;
-        const ferTot = farTot * y;
-
-        const pFarinha = farTot * pool;
-        const pAg = pFarinha;
-        let yPool = 0.001; // fallback
-        if (temp >= 18 && temp <= 20) yPool = 0.0013; else if (temp > 20 && temp <= 24) yPool = 0.0010; else if (temp > 24 && temp <= 28) yPool = 0.0006;
-        const pFermento = pFarinha * yPool;
-
-        const pf = Math.min(pFarinha, farTot);
-        const pa = Math.min(pAg, aguTot);
-        const py = Math.min(pFermento, ferTot);
-
-        const finFar = Math.max(0, farTot - pf);
-        const finAgu = Math.max(0, aguTot - pa);
-        const finSal = salTot;
-        const finFer = Math.max(0, ferTot - py);
-
-        massaTotal.textContent = fmt(massTot);
-        farinhaTotal.textContent = fmt(farTot);
-        aguaTotal.textContent = fmt(aguTot);
-        salTotal.textContent = fmt(salTot);
-        fermTotal.textContent = fmt(ferTot);
-
-        pFar.textContent = fmt(pf);
-        pAgua.textContent = fmt(pa);
-        pFer.textContent = fmt(py);
-        pPeso.textContent = fmt(pf+pa+py);
-        pInstr.textContent = `Na noite anterior: misture ${fmt(pf)} de farinha, ${fmt(pa)} de água e ${fmt(py)} de fermento. Deixe fermentar 8–12h.`;
-
-        fFar.textContent = fmt(finFar);
-        fAgua.textContent = fmt(finAgu);
-        fSal.textContent = fmt(finSal);
-        fFer.textContent = fmt(finFer);
-
-        const hid = Math.round(h*1000)/10, salp = Math.round(s*1000)/10, poolp = Math.round(pool*1000)/10, tempStr = isNaN(temp)?'-':Math.round(temp);
-        const lines = [
-          `--- ${n} MASSAS ---`,
-          `hidratação ${hid} | poolish ${poolp} | sal ${salp} | temp ${tempStr}`,
-          '',
-          'Poolish',
-          `* FAR: ${Math.round(pf*10)/10}g`,
-          `* H2O: ${Math.round(pa*10)/10}g`,
-          `* FER: ${Math.round(py*10)/10}g`,
-          '',
-          'FINALIZAÇÃO',
-          `* FAR: ${Math.round(finFar*10)/10}g`,
-          `* H2O: ${Math.round(finAgu*10)/10}g`,
-          `* SAL: ${Math.round(finSal*10)/10}g`,
-          `* FER: ${Math.round(finFer*10)/10}g`,
-        ];
-        resumo.value = lines.join('\n');
-        save();
-      }
-
-      [nM,pPct,hPct,sPct,yPct,tC].forEach(i=>{ i.addEventListener('input', recalc); i.addEventListener('change', recalc); });
-      if (copyBtn) copyBtn.addEventListener('click', async () => {
-        try{ await navigator.clipboard.writeText(resumo.value); copyStatus.textContent = 'Copiado!'; setTimeout(()=>copyStatus.textContent='',2000);}catch(e){ copyStatus.textContent = 'Falha ao copiar'; }
-      });
-
-      load();
-      recalc();
-    })();
-
-    // --- Massa Base (produtos) (Escondido, mas mantido) ---
+    // Massa Base products (original)
     (function(){
       const PRODUCTS_URL = 'products.json';
       const STORAGE_KEY = 'tab_mb_products_v1';
-
       const $ = id => document.getElementById(id);
       const listEl = $('mb-list');
       const totalEl = $('mb-total');
@@ -585,44 +661,31 @@
       const importFile = $('mb-importFile');
 
       let products = [];
-
       const formatG = n => `${Math.round(n)} g`;
-
       function persist(){
-        try{
-          const data = products.map(p => ({name:p.name, weight:p.weight, qty:p.qty||0}));
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        }catch(e){ console.warn('Falha ao salvar MB', e); }
+        try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(products.map(p=>({name:p.name,weight:p.weight,qty:p.qty||0})))); }catch(e){}
       }
-
       async function load(){
         try{
           const raw = localStorage.getItem(STORAGE_KEY);
-          if(raw){
-            products = JSON.parse(raw);
-          } else {
+          if(raw){ products = JSON.parse(raw); }
+          else {
             const res = await fetch(PRODUCTS_URL);
             products = await res.json();
             products = products.map(p => ({...p, qty: p.qty || 0}));
           }
-        }catch(e){
-          console.warn('Falha ao carregar produtos', e);
-          products = [];
-        }
+        }catch(e){ products = []; }
         render();
       }
-
       function createRow(p, idx){
         const row = document.createElement('div');
         row.className = 'card';
         row.style.marginTop = '10px';
         row.style.padding = '10px';
-
         const top = document.createElement('div');
         top.className = 'row';
         top.style.alignItems = 'center';
         top.style.justifyContent = 'space-between';
-
         const left = document.createElement('div');
         const title = document.createElement('div');
         title.innerHTML = `<strong>${p.name}</strong>`;
@@ -632,49 +695,38 @@
         left.appendChild(title);
         left.appendChild(sub);
         left.addEventListener('dblclick', (e)=>{ e.stopPropagation(); showEdit(idx, row); });
-
         const right = document.createElement('div');
         right.style.display = 'flex';
         right.style.alignItems = 'center';
         right.style.gap = '8px';
-
         const btnMinus = document.createElement('button');
         btnMinus.className = 'btn';
         btnMinus.textContent = '−';
         btnMinus.style.width = '44px';
         btnMinus.addEventListener('click', ()=> setQty(idx, (p.qty||0)-1));
-
         const qty = document.createElement('input');
         qty.type = 'number'; qty.min = '0'; qty.value = p.qty||0;
         qty.style.width = '80px'; qty.style.textAlign = 'center'; qty.style.fontWeight='800';
-        qty.addEventListener('change', ()=>{
-          const v = Math.max(0, parseInt(qty.value)||0);
-          setQty(idx, v);
-        });
-
+        qty.addEventListener('change', ()=>{ const v = Math.max(0, parseInt(qty.value)||0); setQty(idx, v); });
         const btnPlus = document.createElement('button');
         btnPlus.className = 'btn primary';
         btnPlus.textContent = '+';
         btnPlus.style.width = '44px';
         btnPlus.addEventListener('click', ()=> setQty(idx, (p.qty||0)+1));
-
         const pill = document.createElement('div');
         pill.className = 'pill';
         pill.style.minWidth = '88px';
         pill.style.textAlign = 'center';
         pill.textContent = formatG((p.qty||0) * p.weight);
-
         right.appendChild(btnMinus);
         right.appendChild(qty);
         right.appendChild(btnPlus);
         right.appendChild(pill);
-
         top.appendChild(left);
         top.appendChild(right);
         row.appendChild(top);
         return {row, qty, pill};
       }
-
       function showEdit(idx, container){
         if(container._edit){ return; }
         const wrap = document.createElement('div');
@@ -682,14 +734,11 @@
         wrap.style.marginTop = '8px';
         wrap.style.padding = '10px';
         wrap.style.background = '#0b1224';
-
         const name = document.createElement('input'); name.type='text'; name.value=products[idx].name; name.placeholder='Nome';
         const weight = document.createElement('input'); weight.type='number'; weight.value=products[idx].weight; weight.placeholder='Peso (g)'; weight.style.marginTop='8px';
-
         const actions = document.createElement('div'); actions.style.display='flex'; actions.style.gap='8px'; actions.style.marginTop='8px';
         const save = document.createElement('button'); save.className='btn primary'; save.textContent='Salvar';
         const del = document.createElement('button'); del.className='btn'; del.textContent='Excluir';
-
         save.addEventListener('click', ()=>{
           const newName = (name.value||'').trim() || products[idx].name;
           const newW = Math.max(0, parseInt(weight.value)||products[idx].weight);
@@ -700,55 +749,38 @@
           if(!confirm('Excluir este produto?')) return;
           products.splice(idx,1); persist(); render();
         });
-
         actions.appendChild(save); actions.appendChild(del);
         wrap.appendChild(name); wrap.appendChild(weight); wrap.appendChild(actions);
         container.appendChild(wrap);
         container._edit = wrap;
       }
-
       function render(){
         listEl.innerHTML='';
-        const rows = [];
         products.forEach((p,i)=>{
           const {row, qty, pill} = createRow(p,i);
           row._qty = qty; row._pill = pill;
           listEl.appendChild(row);
-          rows.push(row);
         });
         updateSummary();
       }
-
       function setQty(idx, v){
         if(v<0) v=0;
         products[idx].qty = v;
-        // update UI
         const row = listEl.children[idx];
-        if(row){
-          row._qty.value = v;
-          row._pill.textContent = formatG(v * products[idx].weight);
-        }
+        if(row){ row._qty.value = v; row._pill.textContent = formatG(v * products[idx].weight); }
         updateSummary();
         persist();
       }
-
       function updateSummary(){
         const total = products.reduce((s,p)=> s + (p.weight * (p.qty||0)), 0);
         totalEl.textContent = formatG(total);
         const batches = Math.ceil(total / 350) || 0;
         batchesEl.textContent = `${batches}`;
-
         const lines = products.filter(p=> (p.qty||0)>0).map(p=> `${p.name} - ${p.qty}`);
         selectedEl.value = lines.join('\n');
       }
-
-      // actions
-      if(copyBtn) copyBtn.addEventListener('click', async ()=>{
-        try{ await navigator.clipboard.writeText(selectedEl.value); copyStatus.textContent='Copiado!'; setTimeout(()=>copyStatus.textContent='', 1800);}catch(e){ copyStatus.textContent='Falha ao copiar'; }
-      });
-
+      if(copyBtn) copyBtn.addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(selectedEl.value); copyStatus.textContent='Copiado!'; setTimeout(()=>copyStatus.textContent='', 1800);}catch(e){ copyStatus.textContent='Falha ao copiar'; } });
       if(addBtn) addBtn.addEventListener('click', ()=>{
-        // quick add inline
         const quick = document.createElement('div');
         quick.className = 'card'; quick.style.marginTop='8px'; quick.style.padding='10px';
         const name = document.createElement('input'); name.type='text'; name.placeholder='Nome do produto';
@@ -758,7 +790,6 @@
         const cancel = document.createElement('button'); cancel.className='btn'; cancel.textContent='Cancelar';
         actions.appendChild(save); actions.appendChild(cancel);
         quick.appendChild(name); quick.appendChild(weight); quick.appendChild(actions);
-        // insert at top
         if(listEl.firstChild) listEl.insertBefore(quick, listEl.firstChild); else listEl.appendChild(quick);
         name.focus();
         save.addEventListener('click', ()=>{
@@ -768,7 +799,6 @@
         });
         cancel.addEventListener('click', ()=> quick.remove());
       });
-
       if(exportBtn) exportBtn.addEventListener('click', ()=>{
         const data = JSON.stringify(products.map(p=>({name:p.name,weight:p.weight})), null, 2);
         const blob = new Blob([data], {type:'application/json'});
@@ -776,7 +806,6 @@
         const a = document.createElement('a');
         a.href=url; a.download='products-export.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
       });
-
       if(importBtn) importBtn.addEventListener('click', ()=> importFile && importFile.click());
       if(importFile) importFile.addEventListener('change', (e)=>{
         const f = e.target.files && e.target.files[0]; if(!f) return;
@@ -792,263 +821,154 @@
         reader.readAsText(f);
         importFile.value = '';
       });
-
       load();
     })();
 
-    // --- MassaZ (massas base) ---
+    // Código original das calculadoras Num Massas, MassaZ, PizzaZ, Pizzas (replicado fielmente)
     (function(){
-      const SKEY = 'tab_calc_massaz_v1';
-      const $ = id => document.getElementById(id);
-      const nEl = $('mz-n');
-      const hEl = $('mz-h');
-      const sEl = $('mz-s');
-      const yEl = $('mz-y');
-      const oEl = $('mz-o'); // Input de Óleo
-
-      const farEl = $('mz-far');
-      const aguaEl = $('mz-agua');
-      const salEl = $('mz-sal');
-      const ferEl = $('mz-fer');
-      const oleoEl = $('mz-oleo'); // Output de Óleo
-
-      const resumo = $('mz-resumo');
-      const copyBtn = $('mz-copy');
-      const copyStatus = $('mz-copyStatus');
-
+      const SKEY = 'tab_calc_nm_v1';
+      const el = id => document.getElementById(id);
+      const nM = el('nm-nMassas');
+      const pPct = el('nm-poolishPct');
+      const hPct = el('nm-aguaPct');
+      const sPct = el('nm-salPct');
+      const yPct = el('nm-fermentoPct');
+      const tC = el('nm-tempC');
+      const massaTotal = el('nm-massaTotal');
+      const farinhaTotal = el('nm-farinhaTotal');
+      const aguaTotal = el('nm-aguaTotal');
+      const salTotal = el('nm-salTotal');
+      const fermTotal = el('nm-fermentoTotal');
+      const pFar = el('nm-poolishFarinha');
+      const pAgua = el('nm-poolishAgua');
+      const pFer = el('nm-poolishFermento');
+      const pPeso = el('nm-poolishPeso');
+      const pInstr = el('nm-poolishInstr');
+      const fFar = el('nm-finFarinha');
+      const fAgua = el('nm-finAgua');
+      const fSal = el('nm-finSal');
+      const fFer = el('nm-finFermento');
+      const resumo = el('nm-resumo');
+      const copyBtn = el('nm-copy');
+      const copyStatus = el('nm-copyStatus');
       function load(){
-        try{
-          const raw = localStorage.getItem(SKEY);
-          if(!raw) return;
-          const s = JSON.parse(raw);
-          if(s.n!=null) nEl.value = s.n;
-          if(s.h!=null) hEl.value = s.h;
-          if(s.s!=null) sEl.value = s.s;
-          if(s.y!=null) yEl.value = s.y;
-          if(s.o!=null) oEl.value = s.o;
+        try{ const raw = localStorage.getItem(SKEY); if(!raw) return; const s = JSON.parse(raw);
+          if(s.nM!=null) nM.value = s.nM; if(s.pPct!=null) pPct.value = s.pPct; if(s.hPct!=null) hPct.value = s.hPct; if(s.sPct!=null) sPct.value = s.sPct; if(s.yPct!=null) yPct.value = s.yPct; if(s.tC!=null) tC.value = s.tC;
         }catch(e){}
       }
-      function save(){
-        try{ localStorage.setItem(SKEY, JSON.stringify({n:nEl.value,h:hEl.value,s:sEl.value,y:yEl.value,o:oEl.value})); }catch(e){}
-      }
-
+      function save(){ try{ localStorage.setItem(SKEY, JSON.stringify({nM:nM.value,pPct:pPct.value,hPct:hPct.value,sPct:sPct.value,yPct:yPct.value,tC:tC.value})); }catch(e){} }
       function recalc(){
-        const n = Math.max(1, parseInt(nEl.value||'0'));
-        const h = Math.max(0, parseFloat(hEl.value||'63'))/100; // fração
-        const s = Math.max(0, parseFloat(sEl.value||'1.5'))/100; // fração
-        const y = Math.max(0, parseFloat(yEl.value||'0.3'))/100; // fração
-        const o = Math.max(0, parseFloat(oEl.value||'1.0'))/100; // fração do óleo
-
-        const massaFinal = n * 350; // g
-        // A fórmula agora considera o óleo na soma das proporções
-        const farinha = massaFinal / (1 + h + s + y + o);
-        const agua = farinha * h;
-        const sal = farinha * s;
-        const ferm = farinha * y;
-        const oleo = farinha * o;
-
-        farEl.textContent = fmt(farinha);
-        aguaEl.textContent = fmt(agua);
-        salEl.textContent = fmt(sal);
-        ferEl.textContent = fmt(ferm);
-        oleoEl.textContent = fmt(oleo);
-
-        const lines = [
-          `--- ${n} MASSAS ---`,
-          ``,
-          `hidratação ${Math.round(h*1000)/10}% | sal ${Math.round(s*1000)/10}% | ferm ${Math.round(y*1000)/10}% | óleo ${Math.round(o*1000)/10}%`,
-          ``,
-          `RECEITA`,
-          ``,
-          `* FAR: ${Math.round(farinha*10)/10}g`,
-          `* H2O: ${Math.round(agua*10)/10}g`,
-          `* SAL: ${Math.round(sal*10)/10}g`,
-          `* FER: ${Math.round(ferm*10)/10}g`,
-          `* OLEO: ${Math.round(oleo*10)/10}g`,
-        ];
+        const n = Math.max(1, parseInt(nM.value||'0'));
+        const massTot = n*350;
+        const h = Math.max(0, parseFloat(hPct.value||'62'))/100;
+        const s = Math.max(0, parseFloat(sPct.value||'1.5'))/100;
+        const y = Math.max(0, parseFloat(yPct.value||'0.3'))/100;
+        const pool = Math.max(0, Math.min(0.8, parseFloat(pPct.value||'30')/100));
+        const temp = parseFloat(tC.value||'25');
+        const farTot = massTot / (1 + h + s + y);
+        const aguTot = farTot * h;
+        const salTot = farTot * s;
+        const ferTot = farTot * y;
+        const pFarinha = farTot * pool;
+        const pAg = pFarinha;
+        let yPool = 0.001;
+        if (temp >= 18 && temp <= 20) yPool = 0.0013; else if (temp > 20 && temp <= 24) yPool = 0.0010; else if (temp > 24 && temp <= 28) yPool = 0.0006;
+        const pFermento = pFarinha * yPool;
+        const pf = Math.min(pFarinha, farTot);
+        const pa = Math.min(pAg, aguTot);
+        const py = Math.min(pFermento, ferTot);
+        const finFar = Math.max(0, farTot - pf);
+        const finAgu = Math.max(0, aguTot - pa);
+        const finSal = salTot;
+        const finFer = Math.max(0, ferTot - py);
+        massaTotal.textContent = fmt(massTot);
+        farinhaTotal.textContent = fmt(farTot);
+        aguaTotal.textContent = fmt(aguTot);
+        salTotal.textContent = fmt(salTot);
+        fermTotal.textContent = fmt(ferTot);
+        pFar.textContent = fmt(pf);
+        pAgua.textContent = fmt(pa);
+        pFer.textContent = fmt(py);
+        pPeso.textContent = fmt(pf+pa+py);
+        pInstr.textContent = `Na noite anterior: misture ${fmt(pf)} de farinha, ${fmt(pa)} de água e ${fmt(py)} de fermento. Deixe fermentar 8–12h.`;
+        fFar.textContent = fmt(finFar);
+        fAgua.textContent = fmt(finAgu);
+        fSal.textContent = fmt(finSal);
+        fFer.textContent = fmt(finFer);
+        const lines = [`--- ${n} MASSAS ---`,`hidratação ${Math.round(h*1000)/10} | poolish ${Math.round(pool*1000)/10} | sal ${Math.round(s*1000)/10} | temp ${Math.round(temp)}`,'','Poolish',`* FAR: ${Math.round(pf*10)/10}g`,`* H2O: ${Math.round(pa*10)/10}g`,`* FER: ${Math.round(py*10)/10}g`,'','FINALIZAÇÃO',`* FAR: ${Math.round(finFar*10)/10}g`,`* H2O: ${Math.round(finAgu*10)/10}g`,`* SAL: ${Math.round(finSal*10)/10}g`,`* FER: ${Math.round(finFer*10)/10}g`];
         resumo.value = lines.join('\n');
         save();
       }
-
+      [nM,pPct,hPct,sPct,yPct,tC].forEach(i=>{ i.addEventListener('input', recalc); i.addEventListener('change', recalc); });
+      if (copyBtn) copyBtn.addEventListener('click', async () => { try{ await navigator.clipboard.writeText(resumo.value); copyStatus.textContent = 'Copiado!'; setTimeout(()=>copyStatus.textContent='',2000);}catch(e){ copyStatus.textContent = 'Falha ao copiar'; } });
+      load(); recalc();
+    })();
+    (function(){
+      const SKEY = 'tab_calc_massaz_v1';
+      const $ = id => document.getElementById(id);
+      const nEl = $('mz-n'); const hEl = $('mz-h'); const sEl = $('mz-s'); const yEl = $('mz-y'); const oEl = $('mz-o');
+      const farEl = $('mz-far'); const aguaEl = $('mz-agua'); const salEl = $('mz-sal'); const ferEl = $('mz-fer'); const oleoEl = $('mz-oleo');
+      const resumo = $('mz-resumo'); const copyBtn = $('mz-copy'); const copyStatus = $('mz-copyStatus');
+      function load(){ try{ const raw = localStorage.getItem(SKEY); if(!raw) return; const s = JSON.parse(raw); if(s.n!=null) nEl.value = s.n; if(s.h!=null) hEl.value = s.h; if(s.s!=null) sEl.value = s.s; if(s.y!=null) yEl.value = s.y; if(s.o!=null) oEl.value = s.o; }catch(e){} }
+      function save(){ try{ localStorage.setItem(SKEY, JSON.stringify({n:nEl.value,h:hEl.value,s:sEl.value,y:yEl.value,o:oEl.value})); }catch(e){} }
+      function recalc(){
+        const n = Math.max(1, parseInt(nEl.value||'0')); const h = Math.max(0, parseFloat(hEl.value||'63'))/100; const s = Math.max(0, parseFloat(sEl.value||'1.5'))/100; const y = Math.max(0, parseFloat(yEl.value||'0.3'))/100; const o = Math.max(0, parseFloat(oEl.value||'1.0'))/100;
+        const massaFinal = n * 350; const farinha = massaFinal / (1 + h + s + y + o); const agua = farinha * h; const sal = farinha * s; const ferm = farinha * y; const oleo = farinha * o;
+        farEl.textContent = fmt(farinha); aguaEl.textContent = fmt(agua); salEl.textContent = fmt(sal); ferEl.textContent = fmt(ferm); oleoEl.textContent = fmt(oleo);
+        const lines = [`--- ${n} MASSAS ---`,``,`hidratação ${Math.round(h*1000)/10}% | sal ${Math.round(s*1000)/10}% | ferm ${Math.round(y*1000)/10}% | óleo ${Math.round(o*1000)/10}%`,``,`RECEITA`,``,`* FAR: ${Math.round(farinha*10)/10}g`,`* H2O: ${Math.round(agua*10)/10}g`,`* SAL: ${Math.round(sal*10)/10}g`,`* FER: ${Math.round(ferm*10)/10}g`,`* OLEO: ${Math.round(oleo*10)/10}g`];
+        resumo.value = lines.join('\n'); save();
+      }
       [nEl,hEl,sEl,yEl,oEl].forEach(i=>{ if(i){ i.addEventListener('input', recalc); i.addEventListener('change', recalc); } });
       if (copyBtn) copyBtn.addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(resumo.value); copyStatus.textContent='Copiado!'; setTimeout(()=>copyStatus.textContent='',1800);}catch(e){ copyStatus.textContent='Falha ao copiar'; } });
-
-      load();
-      recalc();
+      load(); recalc();
     })();
-
-    // --- Pizzas (BIGA) (Escondido, mas mantido) ---
+    (function(){
+      const SKEY = 'tab_calc_pizzaz_v1';
+      const $ = id => document.getElementById(id);
+      const n = $('pzZ-n'); const bola = $('pzZ-bola'); const hidr = $('pzZ-hidr'); const ferm = $('pzZ-ferm'); const sal = $('pzZ-sal'); const oleo = $('pzZ-oleo');
+      const farOut = $('pzZ-far'); const aguaOut = $('pzZ-agua'); const fermOut = $('pzZ-fermOut'); const salOut = $('pzZ-salOut'); const oleoOut = $('pzZ-oleoOut');
+      const resumo = $('pzZ-resumo'); const copyBtn = $('pzZ-copy'); const copyStatus = $('pzZ-copyStatus');
+      function load(){ try{ const raw = localStorage.getItem(SKEY); if(!raw) return; const s = JSON.parse(raw); if(s.N!=null) n.value = s.N; if(s.B!=null) bola.value = s.B; if(s.H!=null) hidr.value = s.H; if(s.F!=null) ferm.value = s.F; if(s.S!=null) sal.value = s.S; if(s.O!=null) oleo.value = s.O; }catch(e){} }
+      function save(){ try{ localStorage.setItem(SKEY, JSON.stringify({N:n.value,B:bola.value,H:hidr.value,F:ferm.value,S:sal.value,O:oleo.value})); }catch(e){} }
+      function recalc(){
+        const N = Math.max(1, parseInt(n.value||'0')); const PB = Math.max(1, parseFloat(bola.value||'280')); const H = Math.max(0, parseFloat(hidr.value||'60'))/100; const F = Math.max(0, parseFloat(ferm.value||'1.4'))/100; const S = Math.max(0, parseFloat(sal.value||'2.5'))/100; const O = Math.max(0, parseFloat(oleo.value||'2.0'))/100;
+        const pesoTot = N * PB; const farinha = pesoTot / (1 + H + F + S + O); const agua = farinha * H; const fermento = farinha * F; const salTot = farinha * S; const oleoTot = farinha * O;
+        farOut.textContent = fmt(farinha); aguaOut.textContent = fmt(agua); fermOut.textContent = fmt(fermento); salOut.textContent = fmt(salTot); oleoOut.textContent = fmt(oleoTot);
+        const lines = [`--- PIZZAS (com óleo) ---`,`N=${N} | bola=${PB}g | hidratação=${Math.round(H*1000)/10}% | ferm=${Math.round(F*1000)/10}% | sal=${Math.round(S*1000)/10}% | oleo=${Math.round(O*1000)/10}%`,``,`RECEITA:`,``,`_FAR: ${Math.round(farinha*10)/10}g`,`_FERM: ${Math.round(fermento*10)/10}g`,`_H2O: ${Math.round(agua*10)/10}g`,`_SAL: ${Math.round(salTot*10)/10}g`,`* OLEO: ${Math.round(oleoTot*10)/10}g`,``,`Orientação: manter massa entre 20–24 °C. Aguarde ~1h antes de formar bolinhas; levar à geladeira por 24h.`];
+        resumo.value = lines.join('\n'); save();
+      }
+      [n,bola,hidr,ferm,sal,oleo].forEach(i=>{ if(i){ i.addEventListener('input', recalc); i.addEventListener('change', recalc); } });
+      if(copyBtn) copyBtn.addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(resumo.value); copyStatus.textContent='Copiado!'; setTimeout(()=>copyStatus.textContent='',1800);}catch(e){ copyStatus.textContent='Falha ao copiar'; } });
+      load(); recalc();
+    })();
     (function(){
       const SKEY = 'tab_calc_pizzas_v1';
       const $ = id => document.getElementById(id);
-      // inputs
       const n=$('pz-n'), bola=$('pz-bola'), hidrFinal=$('pz-hidrFinal'), pctBiga=$('pz-pctBiga'), temp=$('pz-temp'), tempo=$('pz-tempo'), sal=$('pz-sal'), hidrBiga=$('pz-hidrBiga');
-      // outputs
       const totalMassa=$('pz-totalMassa'), farTotal=$('pz-farTotal'), aguaTotal=$('pz-aguaTotal'), salTotal=$('pz-salTotal');
       const farBiga=$('pz-farBiga'), aguaBiga=$('pz-aguaBiga'), ferBiga=$('pz-ferBiga'), bigaInstr=$('pz-bigaInstr');
       const farFinal=$('pz-farFinal'), aguaFinal=$('pz-aguaFinal'), salOut=$('pz-salOut');
       const resumo=$('pz-resumo'), copyBtn=$('pz-copy'), copyStatus=$('pz-copyStatus'), warnings=$('pz-warnings');
-
       function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
-
       function recalc(){
-        const N = Math.max(1, parseInt(n.value||'0'));
-        const PB = Math.max(1, parseFloat(bola.value||'0'));
-        const HF = Math.max(0, parseFloat(hidrFinal.value||'60'))/100; // fração
-        const PCTB = Math.max(0, parseFloat(pctBiga.value||'50'))/100; // fração
-        const T = parseFloat(temp.value||'24');
-        const H = Math.max(1, parseFloat(tempo.value||'8'));
-        const SAL = Math.max(0, parseFloat(sal.value||'2.5'))/100; // fração
-        const HB = Math.max(0, parseFloat(hidrBiga.value||'45'))/100; // fração
-
-        const pesoTot = N * PB;
-        const farinhaTot = pesoTot / (1 + HF + SAL);
-        const aguaTot = farinhaTot * HF;
-        const salTot = farinhaTot * SAL;
-
-        const fBiga = farinhaTot * PCTB;
-        const fFinal = farinhaTot - fBiga;
-        const aBiga = fBiga * HB;
-        const aFinal = Math.max(0, aguaTot - aBiga);
-
-        const fermentoBase = 0.22/100; // 0,22%
-        let fatorTemp = 1.0;
-        if (T <= 20) fatorTemp = 1.15; else if (T <= 22) fatorTemp = 1.05; else if (T <= 24) fatorTemp = 1.00; else if (T <= 26) fatorTemp = 0.90; else fatorTemp = 0.80;
-        const fatorTempo = clamp(8 / H, 0.7, 1.3);
-        const fermPctFinal = fermentoBase * fatorTemp * fatorTempo; // fração
-        const fBigaFer = fBiga * fermPctFinal;
-
-        // set outputs
-        totalMassa.textContent = fmt(pesoTot);
-        farTotal.textContent = fmt(farinhaTot);
-        aguaTotal.textContent = fmt(aguaTot);
-        salTotal.textContent = fmt(salTot);
-
-        farBiga.textContent = fmt(fBiga);
-        aguaBiga.textContent = fmt(aBiga);
-        ferBiga.textContent = fmt(fBigaFer);
-        farFinal.textContent = fmt(fFinal);
-        aguaFinal.textContent = fmt(aFinal);
-        salOut.textContent = fmt(salTot);
+        const N = Math.max(1, parseInt(n.value||'0')); const PB = Math.max(1, parseFloat(bola.value||'0')); const HF = Math.max(0, parseFloat(hidrFinal.value||'60'))/100; const PCTB = Math.max(0, parseFloat(pctBiga.value||'50'))/100; const T = parseFloat(temp.value||'24'); const H = Math.max(1, parseFloat(tempo.value||'8')); const SAL = Math.max(0, parseFloat(sal.value||'2.5'))/100; const HB = Math.max(0, parseFloat(hidrBiga.value||'45'))/100;
+        const pesoTot = N * PB; const farinhaTot = pesoTot / (1 + HF + SAL); const aguaTot = farinhaTot * HF; const salTot = farinhaTot * SAL;
+        const fBiga = farinhaTot * PCTB; const fFinal = farinhaTot - fBiga; const aBiga = fBiga * HB; const aFinal = Math.max(0, aguaTot - aBiga);
+        const fermentoBase = 0.22/100; let fatorTemp = 1.0; if (T <= 20) fatorTemp = 1.15; else if (T <= 22) fatorTemp = 1.05; else if (T <= 24) fatorTemp = 1.00; else if (T <= 26) fatorTemp = 0.90; else fatorTemp = 0.80;
+        const fatorTempo = clamp(8 / H, 0.7, 1.3); const fermPctFinal = fermentoBase * fatorTemp * fatorTempo; const fBigaFer = fBiga * fermPctFinal;
+        totalMassa.textContent = fmt(pesoTot); farTotal.textContent = fmt(farinhaTot); aguaTotal.textContent = fmt(aguaTot); salTotal.textContent = fmt(salTot);
+        farBiga.textContent = fmt(fBiga); aguaBiga.textContent = fmt(aBiga); ferBiga.textContent = fmt(fBigaFer); farFinal.textContent = fmt(fFinal); aguaFinal.textContent = fmt(aFinal); salOut.textContent = fmt(salTot);
         bigaInstr.textContent = `Fermentar por ${H} horas a ${Math.round(T)} °C, coberto, sem vedar totalmente.`;
-
-        // warnings
-        const ws=[];
-        const HFp=HF*100, PCTBp=PCTB*100, HBp=HB*100;
-        if (HFp < 55 || HFp > 70) ws.push('Atenção: hidratação final fora do intervalo 55–70%.');
-        if (PCTBp < 30 || PCTBp > 70) ws.push('Atenção: percentual de BIGA fora do intervalo 30–70%.');
-        if (HBp < 44 || HBp > 50) ws.push('Atenção: hidratação da BIGA fora do intervalo 44–50%.');
-        if (T > 28) ws.push('Alerta crítico: temperatura da BIGA acima de 28 °C (risco de colapso).');
+        const ws=[]; const HFp=HF*100, PCTBp=PCTB*100, HBp=HB*100; if (HFp < 55 || HFp > 70) ws.push('Atenção: hidratação final fora do intervalo 55–70%.'); if (PCTBp < 30 || PCTBp > 70) ws.push('Atenção: percentual de BIGA fora do intervalo 30–70%.'); if (HBp < 44 || HBp > 50) ws.push('Atenção: hidratação da BIGA fora do intervalo 44–50%.'); if (T > 28) ws.push('Alerta crítico: temperatura da BIGA acima de 28 °C (risco de colapso).');
         warnings.innerHTML = ws.length ? ws.map(s=>`• ${s}`).join('<br>') : 'Parâmetros dentro dos limites recomendados.';
-
-        // resumo
-        const lines = [
-          `--- PIZZAS (BIGA) ---`,
-          `N=${N} | bola=${PB}g | hidrFinal=${Math.round(HFp*10)/10}% | pctBiga=${Math.round(PCTBp*10)/10}% | sal=${Math.round(SAL*1000)/10}%`,
-          `temp=${Math.round(T)}°C | tempo=${H}h | hidrBiga=${Math.round(HBp*10)/10}%`,
-          '',
-          'BIGA',
-          `* FAR: ${Math.round(fBiga*10)/10}g`,
-          `* H2O: ${Math.round(aBiga*10)/10}g`,
-          `* FER: ${Math.round(fBigaFer*10)/10}g`,
-          '',
-          'MASSA FINAL',
-          `* FAR: ${Math.round(fFinal*10)/10}g`,
-          `* H2O: ${Math.round(aFinal*10)/10}g`,
-          `* SAL: ${Math.round(salTot*10)/10}g`,
-          `* FER: 0g`,
-        ];
+        const lines = [`--- PIZZAS (BIGA) ---`,`N=${N} | bola=${PB}g | hidrFinal=${Math.round(HFp*10)/10}% | pctBiga=${Math.round(PCTBp*10)/10}% | sal=${Math.round(SAL*1000)/10}%`,`temp=${Math.round(T)}°C | tempo=${H}h | hidrBiga=${Math.round(HBp*10)/10}%`,'','BIGA',`* FAR: ${Math.round(fBiga*10)/10}g`,`* H2O: ${Math.round(aBiga*10)/10}g`,`* FER: ${Math.round(fBigaFer*10)/10}g`,'','MASSA FINAL',`* FAR: ${Math.round(fFinal*10)/10}g`,`* H2O: ${Math.round(aFinal*10)/10}g`,`* SAL: ${Math.round(salTot*10)/10}g`,`* FER: 0g`];
         resumo.value = lines.join('\n');
-
-        // persist
         try{ localStorage.setItem(SKEY, JSON.stringify({N:n.value,PB:bola.value,HF:hidrFinal.value,PCTB:pctBiga.value,T:temp.value,H:tempo.value,SAL:sal.value,HB:hidrBiga.value})); }catch(e){}
       }
-
-      // load
-      (function(){
-        try{ const raw = localStorage.getItem(SKEY); if(!raw) return; const s = JSON.parse(raw);
-          if(s.N!=null) n.value=s.N; if(s.PB!=null) bola.value=s.PB; if(s.HF!=null) hidrFinal.value=s.HF; if(s.PCTB!=null) pctBiga.value=s.PCTB; if(s.T!=null) temp.value=s.T; if(s.H!=null) tempo.value=s.H; if(s.SAL!=null) sal.value=s.SAL; if(s.HB!=null) hidrBiga.value=s.HB;
-        }catch(e){}
-      })();
-
+      (function(){ try{ const raw = localStorage.getItem(SKEY); if(!raw) return; const s = JSON.parse(raw); if(s.N!=null) n.value=s.N; if(s.PB!=null) bola.value=s.PB; if(s.HF!=null) hidrFinal.value=s.HF; if(s.PCTB!=null) pctBiga.value=s.PCTB; if(s.T!=null) temp.value=s.T; if(s.H!=null) tempo.value=s.H; if(s.SAL!=null) sal.value=s.SAL; if(s.HB!=null) hidrBiga.value=s.HB; }catch(e){} })();
       [n,bola,hidrFinal,pctBiga,temp,tempo,sal,hidrBiga].forEach(i=>{ if(i){ i.addEventListener('input', recalc); i.addEventListener('change', recalc); } });
       if (copyBtn) copyBtn.addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(resumo.value); copyStatus.textContent='Copiado!'; setTimeout(()=>copyStatus.textContent='',1800);}catch(e){ copyStatus.textContent='Falha ao copiar'; } });
-
       recalc();
-    })();
-
-    // --- PizzaZ (massa direta com óleo) ---
-    (function(){
-      const SKEY = 'tab_calc_pizzaz_v1';
-      const $ = id => document.getElementById(id);
-      const n = $('pzZ-n');
-      const bola = $('pzZ-bola');
-      const hidr = $('pzZ-hidr');
-      const ferm = $('pzZ-ferm');
-      const sal = $('pzZ-sal');
-      const oleo = $('pzZ-oleo');
-
-      const farOut = $('pzZ-far');
-      const aguaOut = $('pzZ-agua');
-      const fermOut = $('pzZ-fermOut');
-      const salOut = $('pzZ-salOut');
-      const oleoOut = $('pzZ-oleoOut');
-
-      const resumo = $('pzZ-resumo');
-      const copyBtn = $('pzZ-copy');
-      const copyStatus = $('pzZ-copyStatus');
-
-      function load(){
-        try{ const raw = localStorage.getItem(SKEY); if(!raw) return; const s = JSON.parse(raw);
-          if(s.N!=null) n.value = s.N; if(s.B!=null) bola.value = s.B; if(s.H!=null) hidr.value = s.H; if(s.F!=null) ferm.value = s.F; if(s.S!=null) sal.value = s.S; if(s.O!=null) oleo.value = s.O;
-        }catch(e){}
-      }
-      function save(){ try{ localStorage.setItem(SKEY, JSON.stringify({N:n.value,B:bola.value,H:hidr.value,F:ferm.value,S:sal.value,O:oleo.value})); }catch(e){}
-      }
-
-      function recalc(){
-        const N = Math.max(1, parseInt(n.value||'0'));
-        const PB = Math.max(1, parseFloat(bola.value||'280'));
-        const H = Math.max(0, parseFloat(hidr.value||'60'))/100;
-        const F = Math.max(0, parseFloat(ferm.value||'1.4'))/100;
-        const S = Math.max(0, parseFloat(sal.value||'2.5'))/100;
-        const O = Math.max(0, parseFloat(oleo.value||'2.0'))/100;
-
-        const pesoTot = N * PB;
-        const farinha = pesoTot / (1 + H + F + S + O);
-        const agua = farinha * H;
-        const fermento = farinha * F;
-        const salTot = farinha * S;
-        const oleoTot = farinha * O;
-
-        farOut.textContent = fmt(farinha);
-        aguaOut.textContent = fmt(agua);
-        fermOut.textContent = fmt(fermento);
-        salOut.textContent = fmt(salTot);
-        oleoOut.textContent = fmt(oleoTot);
-
-        const lines = [
-          `--- PIZZAS (com óleo) ---`,
-          `N=${N} | bola=${PB}g | hidratação=${Math.round(H*1000)/10}% | ferm=${Math.round(F*1000)/10}% | sal=${Math.round(S*1000)/10}% | oleo=${Math.round(O*1000)/10}%`,
-          ``,
-          `RECEITA:`,
-          ``,
-          `_FAR: ${Math.round(farinha*10)/10}g`,
-          `_FERM: ${Math.round(fermento*10)/10}g`,
-          `_H2O: ${Math.round(agua*10)/10}g`,
-          `_SAL: ${Math.round(salTot*10)/10}g`,
-          `* OLEO: ${Math.round(oleoTot*10)/10}g`,
-          ``,
-          `Orientação: manter massa entre 20–24 °C. Aguarde ~1h antes de formar bolinhas; levar à geladeira por 24h.`
-        ];
-        resumo.value = lines.join('\n');
-        save();
-      }
-
-      [n,bola,hidr,ferm,sal,oleo].forEach(i=>{ if(i){ i.addEventListener('input', recalc); i.addEventListener('change', recalc); } });
-      if(copyBtn) copyBtn.addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(resumo.value); copyStatus.textContent='Copiado!'; setTimeout(()=>copyStatus.textContent='',1800);}catch(e){ copyStatus.textContent='Falha ao copiar'; } });
-
-      load(); recalc();
     })();
   </script>
 </body>
