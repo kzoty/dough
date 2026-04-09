@@ -275,6 +275,7 @@
       </div>
     </section>
 
+    <!-- PAINEL PIZZAZ MODIFICADO COM BIGA OPCIONAL -->
     <section class="panel" id="panelPizzaZ" role="tabpanel" aria-labelledby="tabPizzaZ">
       <div class="card">
         <div class="row">
@@ -301,16 +302,48 @@
             <label><span>Óleo (%)</span><input id="pzZ-oleo" type="number" min="0" max="10" step="0.1" value="2.0"></label>
           </div>
         </div>
-        <p class="hint" style="margin-top:10px">Temperatura ideal da massa: 20–24 °C. Espere ~1h antes de dividir em bolinhas; refrigere por 24h.</p>
+
+        <!-- NOVO: toggle BIGA e opções -->
+        <div style="margin-top:16px; border-top: 1px solid var(--border); padding-top: 12px;">
+          <label style="flex-direction: row; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="checkbox" id="pzZ-usarBiga"> Usar pré-fermento (BIGA)
+          </label>
+          <div id="pzZ-bigaOptions" style="display: none; margin-top: 12px;">
+            <div class="row">
+              <div class="col">
+                <label><span>% BIGA (sobre farinha total)</span><input id="pzZ-pctBiga" type="number" min="10" max="60" step="1" value="20"></label>
+              </div>
+              <div class="col">
+                <label><span>% Água da BIGA (sobre farinha da BIGA)</span><input id="pzZ-hidrBiga" type="number" min="40" max="80" step="1" value="65"></label>
+              </div>
+            </div>
+            <p class="hint" style="margin-top:6px">Todo o fermento será usado na BIGA. Farinha e água restantes farão autólise por 1-2h enquanto a BIGA fermenta.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card BIGA (exibido apenas quando ativado) -->
+      <div id="pzZ-bigaCard" class="card" style="display: none;">
+        <h3 style="margin:0 0 8px 0">🧀 Pré-fermento (BIGA)</h3>
+        <div class="row"><div class="col">Farinha BIGA</div><div class="pill" id="pzZ-bigaFar">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Água BIGA</div><div class="pill" id="pzZ-bigaAgua">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Fermento BIGA</div><div class="pill" id="pzZ-bigaFerm">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Peso BIGA</div><div class="pill" id="pzZ-bigaPeso">0 g</div></div>
+        <p class="hint" id="pzZ-bigaInstr" style="margin-top:8px"></p>
       </div>
 
       <div class="card">
-        <h3 style="margin:0 0 8px 0">Receita</h3>
-        <div class="row"><div class="col">Farinha</div><div class="pill" id="pzZ-far">0 g</div></div>
-        <div class="row" style="margin-top:6px"><div class="col">Água</div><div class="pill" id="pzZ-agua">0 g</div></div>
-        <div class="row" style="margin-top:6px"><div class="col">Fermento</div><div class="pill" id="pzZ-fermOut">0 g</div></div>
+        <h3 style="margin:0 0 8px 0">Receita final</h3>
+        <div class="row"><div class="col">Farinha (restante)</div><div class="pill" id="pzZ-far">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Água (restante)</div><div class="pill" id="pzZ-agua">0 g</div></div>
+        <div class="row" style="margin-top:6px"><div class="col">Fermento (adicional)</div><div class="pill" id="pzZ-fermOut">0 g</div></div>
         <div class="row" style="margin-top:6px"><div class="col">Sal</div><div class="pill" id="pzZ-salOut">0 g</div></div>
         <div class="row" style="margin-top:6px"><div class="col">Óleo</div><div class="pill" id="pzZ-oleoOut">0 g</div></div>
+        <!-- Totais (opcional) -->
+        <div style="margin-top:12px; border-top: 1px solid var(--border); padding-top: 8px;">
+          <div class="row"><div class="col">Farinha total</div><div class="pill" id="pzZ-farTotalAux">0 g</div></div>
+          <div class="row" style="margin-top:6px"><div class="col">Água total</div><div class="pill" id="pzZ-aguaTotalAux">0 g</div></div>
+        </div>
       </div>
 
       <div class="card" style="background:#0b0f19;border:1px solid #111827">
@@ -513,7 +546,7 @@
 
     // ======================= CALCULADORA MINI PÃO (COM ÓLEO E AÇÚCAR SEPARADOS) =======================
     (function(){
-      const SKEY = 'tab_calc_minipao_v2';  // versão nova para evitar conflito
+      const SKEY = 'tab_calc_minipao_v2';
       const $ = id => document.getElementById(id);
       const qtd = $('mp-qtd');
       const peso = $('mp-peso');
@@ -567,7 +600,6 @@
         const a = Math.max(0, parseFloat(acucar.value) || 8.0) / 100;
 
         const massaTotal = n * p;
-        // farinha = massaTotal / (1 + h + s + y + o + a)
         const farinha = massaTotal / (1 + h + s + y + o + a);
         const agua = farinha * h;
         const salG = farinha * s;
@@ -824,7 +856,7 @@
       load();
     })();
 
-    // Código original das calculadoras Num Massas, MassaZ, PizzaZ, Pizzas (replicado fielmente)
+    // Código original das calculadoras Num Massas, MassaZ, PizzaZ (modificado), Pizzas
     (function(){
       const SKEY = 'tab_calc_nm_v1';
       const el = id => document.getElementById(id);
@@ -922,25 +954,175 @@
       if (copyBtn) copyBtn.addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(resumo.value); copyStatus.textContent='Copiado!'; setTimeout(()=>copyStatus.textContent='',1800);}catch(e){ copyStatus.textContent='Falha ao copiar'; } });
       load(); recalc();
     })();
+
+    // ======================= CALCULADORA PIZZAZ COM BIGA OPCIONAL =======================
     (function(){
-      const SKEY = 'tab_calc_pizzaz_v1';
+      const SKEY = 'tab_calc_pizzaz_biga_v1';
       const $ = id => document.getElementById(id);
-      const n = $('pzZ-n'); const bola = $('pzZ-bola'); const hidr = $('pzZ-hidr'); const ferm = $('pzZ-ferm'); const sal = $('pzZ-sal'); const oleo = $('pzZ-oleo');
-      const farOut = $('pzZ-far'); const aguaOut = $('pzZ-agua'); const fermOut = $('pzZ-fermOut'); const salOut = $('pzZ-salOut'); const oleoOut = $('pzZ-oleoOut');
-      const resumo = $('pzZ-resumo'); const copyBtn = $('pzZ-copy'); const copyStatus = $('pzZ-copyStatus');
-      function load(){ try{ const raw = localStorage.getItem(SKEY); if(!raw) return; const s = JSON.parse(raw); if(s.N!=null) n.value = s.N; if(s.B!=null) bola.value = s.B; if(s.H!=null) hidr.value = s.H; if(s.F!=null) ferm.value = s.F; if(s.S!=null) sal.value = s.S; if(s.O!=null) oleo.value = s.O; }catch(e){} }
-      function save(){ try{ localStorage.setItem(SKEY, JSON.stringify({N:n.value,B:bola.value,H:hidr.value,F:ferm.value,S:sal.value,O:oleo.value})); }catch(e){} }
-      function recalc(){
-        const N = Math.max(1, parseInt(n.value||'0')); const PB = Math.max(1, parseFloat(bola.value||'280')); const H = Math.max(0, parseFloat(hidr.value||'60'))/100; const F = Math.max(0, parseFloat(ferm.value||'1.4'))/100; const S = Math.max(0, parseFloat(sal.value||'2.5'))/100; const O = Math.max(0, parseFloat(oleo.value||'2.0'))/100;
-        const pesoTot = N * PB; const farinha = pesoTot / (1 + H + F + S + O); const agua = farinha * H; const fermento = farinha * F; const salTot = farinha * S; const oleoTot = farinha * O;
-        farOut.textContent = fmt(farinha); aguaOut.textContent = fmt(agua); fermOut.textContent = fmt(fermento); salOut.textContent = fmt(salTot); oleoOut.textContent = fmt(oleoTot);
-        const lines = [`--- PIZZAS (com óleo) ---`,`N=${N} | bola=${PB}g | hidratação=${Math.round(H*1000)/10}% | ferm=${Math.round(F*1000)/10}% | sal=${Math.round(S*1000)/10}% | oleo=${Math.round(O*1000)/10}%`,``,`RECEITA:`,``,`_FAR: ${Math.round(farinha*10)/10}g`,`_FERM: ${Math.round(fermento*10)/10}g`,`_H2O: ${Math.round(agua*10)/10}g`,`_SAL: ${Math.round(salTot*10)/10}g`,`* OLEO: ${Math.round(oleoTot*10)/10}g`,``,`Orientação: manter massa entre 20–24 °C. Aguarde ~1h antes de formar bolinhas; levar à geladeira por 24h.`];
-        resumo.value = lines.join('\n'); save();
+      const n = $('pzZ-n');
+      const bola = $('pzZ-bola');
+      const hidr = $('pzZ-hidr');
+      const ferm = $('pzZ-ferm');
+      const sal = $('pzZ-sal');
+      const oleo = $('pzZ-oleo');
+      // novos elementos
+      const usarBigaChk = $('pzZ-usarBiga');
+      const bigaOptionsDiv = $('pzZ-bigaOptions');
+      const pctBiga = $('pzZ-pctBiga');
+      const hidrBiga = $('pzZ-hidrBiga');
+      const bigaCard = $('pzZ-bigaCard');
+      // outputs biga
+      const bigaFar = $('pzZ-bigaFar');
+      const bigaAgua = $('pzZ-bigaAgua');
+      const bigaFerm = $('pzZ-bigaFerm');
+      const bigaPeso = $('pzZ-bigaPeso');
+      const bigaInstr = $('pzZ-bigaInstr');
+      // outputs finais (modificados)
+      const farOut = $('pzZ-far');
+      const aguaOut = $('pzZ-agua');
+      const fermOut = $('pzZ-fermOut');
+      const salOut = $('pzZ-salOut');
+      const oleoOut = $('pzZ-oleoOut');
+      const farTotalAux = $('pzZ-farTotalAux');
+      const aguaTotalAux = $('pzZ-aguaTotalAux');
+      const resumo = $('pzZ-resumo');
+      const copyBtn = $('pzZ-copy');
+      const copyStatus = $('pzZ-copyStatus');
+
+      function load(){
+        try{
+          const raw = localStorage.getItem(SKEY);
+          if(!raw) return;
+          const s = JSON.parse(raw);
+          if(s.N != null) n.value = s.N;
+          if(s.B != null) bola.value = s.B;
+          if(s.H != null) hidr.value = s.H;
+          if(s.F != null) ferm.value = s.F;
+          if(s.S != null) sal.value = s.S;
+          if(s.O != null) oleo.value = s.O;
+          if(s.usarBiga != null) usarBigaChk.checked = s.usarBiga;
+          if(s.pctBiga != null) pctBiga.value = s.pctBiga;
+          if(s.hidrBiga != null) hidrBiga.value = s.hidrBiga;
+        } catch(e){}
       }
-      [n,bola,hidr,ferm,sal,oleo].forEach(i=>{ if(i){ i.addEventListener('input', recalc); i.addEventListener('change', recalc); } });
+      function save(){
+        try{
+          localStorage.setItem(SKEY, JSON.stringify({
+            N: n.value, B: bola.value, H: hidr.value, F: ferm.value, S: sal.value, O: oleo.value,
+            usarBiga: usarBigaChk.checked, pctBiga: pctBiga.value, hidrBiga: hidrBiga.value
+          }));
+        } catch(e){}
+      }
+
+      function toggleBigaUI() {
+        const ativo = usarBigaChk.checked;
+        bigaOptionsDiv.style.display = ativo ? 'block' : 'none';
+        bigaCard.style.display = ativo ? 'block' : 'none';
+        // Ajusta labels dos campos finais
+        if(ativo) {
+          farOut.previousElementSibling?.setAttribute('data-original', farOut.previousElementSibling.innerText);
+          farOut.previousElementSibling.innerText = 'Farinha (restante)';
+          aguaOut.previousElementSibling.innerText = 'Água (restante)';
+        } else {
+          const origFar = farOut.previousElementSibling?.getAttribute('data-original');
+          if(origFar) farOut.previousElementSibling.innerText = origFar;
+          else farOut.previousElementSibling.innerText = 'Farinha';
+          aguaOut.previousElementSibling.innerText = 'Água';
+        }
+        recalc();
+      }
+
+      function recalc(){
+        const N = Math.max(1, parseInt(n.value) || 1);
+        const PB = Math.max(1, parseFloat(bola.value) || 280);
+        const H = Math.max(0, parseFloat(hidr.value) || 60) / 100;
+        const F = Math.max(0, parseFloat(ferm.value) || 1.4) / 100;
+        const S = Math.max(0, parseFloat(sal.value) || 2.5) / 100;
+        const O = Math.max(0, parseFloat(oleo.value) || 2.0) / 100;
+
+        const pesoTotal = N * PB;
+        // Denominador inclui fermento (F) pois ele faz parte do peso total
+        const farinhaTotal = pesoTotal / (1 + H + F + S + O);
+        const aguaTotal = farinhaTotal * H;
+        const salTotal = farinhaTotal * S;
+        const oleoTotal = farinhaTotal * O;
+        const fermentoTotal = farinhaTotal * F;
+
+        const usarBiga = usarBigaChk.checked;
+        let farinhaFinal, aguaFinal, fermentoFinal, bigaText = '', farinhaBiga = 0, aguaBiga = 0, fermentoBiga = 0, pesoBiga = 0;
+
+        if(usarBiga) {
+          const pctBigaVal = Math.min(60, Math.max(10, parseFloat(pctBiga.value) || 20)) / 100;
+          const hidrBigaVal = Math.min(80, Math.max(40, parseFloat(hidrBiga.value) || 65)) / 100;
+          farinhaBiga = farinhaTotal * pctBigaVal;
+          aguaBiga = farinhaBiga * hidrBigaVal;
+          fermentoBiga = fermentoTotal; // todo o fermento vai na biga
+          pesoBiga = farinhaBiga + aguaBiga + fermentoBiga;
+          farinhaFinal = farinhaTotal - farinhaBiga;
+          aguaFinal = aguaTotal - aguaBiga;
+          fermentoFinal = 0; // nenhum fermento adicional
+          // aviso se água final negativa
+          if(aguaFinal < 0) {
+            aguaFinal = 0;
+            bigaInstr.textContent = '⚠️ Atenção: a hidratação da BIGA é maior que a hidratação final! Ajuste os percentuais.';
+          } else {
+            bigaInstr.textContent = `Misture a BIGA e deixe fermentar por 1-2h. Enquanto isso, faça a autólise com a farinha restante (${fmt(farinhaFinal)}) e água (${fmt(aguaFinal)}). Após a BIGA, misture tudo, adicione sal e óleo.`;
+          }
+          // exibe biga
+          bigaFar.textContent = fmt(farinhaBiga);
+          bigaAgua.textContent = fmt(aguaBiga);
+          bigaFerm.textContent = fmt(fermentoBiga);
+          bigaPeso.textContent = fmt(pesoBiga);
+          // atualiza outputs finais
+          farOut.textContent = fmt(farinhaFinal);
+          aguaOut.textContent = fmt(aguaFinal);
+          fermOut.textContent = fmt(fermentoFinal);
+          salOut.textContent = fmt(salTotal);
+          oleoOut.textContent = fmt(oleoTotal);
+          farTotalAux.textContent = fmt(farinhaTotal);
+          aguaTotalAux.textContent = fmt(aguaTotal);
+          // texto do resumo
+          bigaText = `\n🧀 PRÉ-FERMENTO (BIGA):\n* FARINHA BIGA: ${fmt(farinhaBiga)}\n* ÁGUA BIGA: ${fmt(aguaBiga)}\n* FERMENTO BIGA: ${fmt(fermentoBiga)}\n* PESO BIGA: ${fmt(pesoBiga)}\n\n🍕 MASSA FINAL (após BIGA + autólise):\n* FARINHA (restante): ${fmt(farinhaFinal)}\n* ÁGUA (restante): ${fmt(aguaFinal)}\n* SAL: ${fmt(salTotal)}\n* ÓLEO: ${fmt(oleoTotal)}\n* FERMENTO ADICIONAL: 0g\n\n➡️ Instruções: Prepare a BIGA e deixe fermentar 1-2h. Enquanto isso, misture a farinha restante com a água restante (autólise). Após o tempo, junte a BIGA, adicione sal e óleo, sove até véu. Modele e asse após crescimento.`;
+        } else {
+          // modo sem biga (original)
+          farinhaFinal = farinhaTotal;
+          aguaFinal = aguaTotal;
+          fermentoFinal = fermentoTotal;
+          farOut.textContent = fmt(farinhaFinal);
+          aguaOut.textContent = fmt(aguaFinal);
+          fermOut.textContent = fmt(fermentoFinal);
+          salOut.textContent = fmt(salTotal);
+          oleoOut.textContent = fmt(oleoTotal);
+          farTotalAux.textContent = fmt(farinhaTotal);
+          aguaTotalAux.textContent = fmt(aguaTotal);
+          bigaText = '';
+        }
+
+        const lines = [
+          `--- PIZZAS ${usarBiga ? 'com BIGA' : 'diretas'} ---`,
+          `N=${N} | bola=${PB}g | hidratação=${Math.round(H*1000)/10}% | fermento=${Math.round(F*1000)/10}% | sal=${Math.round(S*1000)/10}% | óleo=${Math.round(O*1000)/10}%`,
+          ``,
+          `RECEITA TOTAL:`,
+          `* FARINHA TOTAL: ${fmt(farinhaTotal)}`,
+          `* ÁGUA TOTAL: ${fmt(aguaTotal)}`,
+          `* SAL TOTAL: ${fmt(salTotal)}`,
+          `* ÓLEO TOTAL: ${fmt(oleoTotal)}`,
+          `* FERMENTO TOTAL: ${fmt(fermentoTotal)}`,
+          ``,
+          usarBiga ? bigaText : `MODO DIRETO:\n* FARINHA: ${fmt(farinhaTotal)}\n* ÁGUA: ${fmt(aguaTotal)}\n* FERMENTO: ${fmt(fermentoTotal)}\n* SAL: ${fmt(salTotal)}\n* ÓLEO: ${fmt(oleoTotal)}\n\nInstruções: Misture todos os ingredientes, sove até véu, deixe fermentar até dobrar (~1h), divida, modele e asse.`
+        ];
+        resumo.value = lines.join('\n');
+        save();
+      }
+
+      // eventos
+      [n, bola, hidr, ferm, sal, oleo, pctBiga, hidrBiga].forEach(i => { if(i) { i.addEventListener('input', recalc); i.addEventListener('change', recalc); } });
+      usarBigaChk.addEventListener('change', () => { toggleBigaUI(); recalc(); });
       if(copyBtn) copyBtn.addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(resumo.value); copyStatus.textContent='Copiado!'; setTimeout(()=>copyStatus.textContent='',1800);}catch(e){ copyStatus.textContent='Falha ao copiar'; } });
-      load(); recalc();
+      load();
+      toggleBigaUI(); // configura UI inicial e recalcula
     })();
+
     (function(){
       const SKEY = 'tab_calc_pizzas_v1';
       const $ = id => document.getElementById(id);
